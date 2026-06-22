@@ -20,9 +20,16 @@ support tickets and human escalation.
 
 soon...
 
-Run the API with `uvicorn app.main:app --reload` and open `http://localhost:8000/docs`,
-or talk to it through the Telegram bot. The full flow is in
-[docs/demo/demo-walkthrough.md](docs/demo/demo-walkthrough.md).
+Run the API with `uvicorn app.main:app --reload`, then open the local web demo in
+a browser:
+
+- Web demo: <http://localhost:8000/demo>
+- Landing page: <http://localhost:8000/>
+- API docs: <http://localhost:8000/docs>
+
+See [docs/web-demo.md](docs/web-demo.md) for details, or
+[docs/demo/demo-walkthrough.md](docs/demo/demo-walkthrough.md) for the full flow.
+You can also talk to the agent through the Telegram bot.
 
 ## What this project demonstrates
 

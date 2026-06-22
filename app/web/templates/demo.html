@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Marketing Agent — Web Demo</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="demo">
+  <header class="demo-header">
+    <div class="brand">
+      <div class="logo-dot"></div>
+      <span class="brand-name">AI Marketing Agent</span>
+      <a class="brand-link" href="/">Home</a>
+    </div>
+    <span class="badge">Demo mode</span>
+  </header>
+
+  <div class="demo-grid">
+    <!-- Left sidebar -->
+    <aside class="panel sidebar-left">
+      <h2 class="panel-title">Demo scenarios</h2>
+      <div class="scenario-list">
+        <button class="scenario" data-scenario="services">1. Ask about services</button>
+        <button class="scenario" data-scenario="pricing">2. Ask about pricing</button>
+        <button class="scenario" data-scenario="lead">3. Create a lead</button>
+        <button class="scenario" data-scenario="human">4. Ask for human manager</button>
+        <button class="scenario" data-scenario="memory">5. Follow-up with memory</button>
+      </div>
+
+      <h2 class="panel-title">Architecture</h2>
+      <ul class="arch-list">
+        <li>FastAPI</li>
+        <li>LangGraph</li>
+        <li>RAG</li>
+        <li>Qdrant</li>
+        <li>SQLite</li>
+        <li>Telegram bot</li>
+      </ul>
+    </aside>
+
+    <!-- Main chat -->
+    <section class="panel chat-area">
+      <div id="chat" class="chat-window" aria-live="polite">
+        <div class="msg assistant">
+          <div class="bubble">
+            Hi, I'm the NovaGrowth assistant. Ask about our services, pricing or
+            campaigns — or pick a scenario on the left.
+          </div>
+        </div>
+      </div>
+
+      <form id="chat-form" class="chat-input" autocomplete="off">
+        <input id="message" type="text" placeholder="Type a message…" aria-label="Message" required>
+        <button id="send" type="submit" class="btn btn-primary">Send</button>
+        <button id="clear" type="button" class="btn">Clear session</button>
+      </form>
+    </section>
+
+    <!-- Right sidebar -->
+    <aside class="panel sidebar-right">
+      <h2 class="panel-title">Agent actions</h2>
+      <div class="kv">
+        <div class="kv-row"><span class="kv-key">Intent</span><span id="intent" class="kv-val">—</span></div>
+        <div class="kv-row"><span class="kv-key">Action</span><span id="action" class="kv-val">—</span></div>
+        <div class="kv-row"><span class="kv-key">Escalated</span><span id="escalated" class="kv-val">—</span></div>
+        <div class="kv-row"><span class="kv-key">Lead ID</span><span id="lead" class="kv-val">—</span></div>
+        <div class="kv-row"><span class="kv-key">Ticket ID</span><span id="ticket" class="kv-val">—</span></div>
+        <div class="kv-row"><span class="kv-key">Sources</span><span id="sources" class="kv-val">—</span></div>
+      </div>
+
+      <h2 class="panel-title">Demo data</h2>
+      <div class="kv">
+        <div class="kv-row"><span class="kv-key">Session</span><span id="session" class="kv-val mono">—</span></div>
+      </div>
+
+      <h2 class="panel-title">Links</h2>
+      <div class="link-list">
+        <a class="btn btn-sm" href="/docs">API Docs</a>
+        <a class="btn btn-sm" href="/metrics/demo">Demo Metrics</a>
+      </div>
+    </aside>
+  </div>
+
+  <script src="/static/demo.js" defer></script>
+</body>
+</html>
