@@ -1,0 +1,88 @@
+<svg width="1160" height="820" viewBox="0 0 1160 820" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1020"/><stop offset="1" stop-color="#0e1730"/>
+    </linearGradient>
+    <marker id="a2" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#5b6b8c"/>
+    </marker>
+    <style>
+      .box{rx:14;stroke-width:2;}
+      .t{fill:#e2e8f0;font-size:20px;font-weight:600;}
+      .s{fill:#94a3b8;font-size:14px;}
+      .lk{stroke:#5b6b8c;stroke-width:2.5;fill:none;}
+    </style>
+  </defs>
+  <rect width="1160" height="820" fill="url(#bg2)"/>
+
+  <text x="60" y="56" fill="#f1f5f9" font-size="30" font-weight="700">Architecture Overview</text>
+  <text x="60" y="84" fill="#8aa0c6" font-size="15" letter-spacing="2">NovaGrowth AI Marketing Agent – portfolio case study · fictional agency</text>
+
+  <!-- links -->
+  <g class="lk" marker-end="url(#a2)">
+    <path d="M440 152 L520 200"/>      <!-- telegram -> fastapi -->
+    <path d="M720 152 L640 200"/>      <!-- web -> fastapi -->
+    <path d="M580 262 L580 310"/>      <!-- fastapi -> langgraph -->
+    <path d="M495 376 L300 430"/>      <!-- agent -> llm -->
+    <path d="M580 376 L580 430"/>      <!-- agent -> qdrant -->
+    <path d="M685 372 L820 452"/>      <!-- agent -> crm tools -->
+    <path d="M700 360 L820 565"/>      <!-- agent -> escalation -->
+    <path d="M580 560 L580 494"/>      <!-- knowledge -> qdrant (up) -->
+    <path d="M880 492 L760 668"/>      <!-- crm tools -> sqlite -->
+    <path d="M890 598 L780 700"/>      <!-- escalation -> sqlite -->
+  </g>
+
+  <!-- Clients -->
+  <g>
+    <rect x="340" y="90" width="200" height="62" rx="14" fill="#152038" stroke="#2dd4bf" class="box"/>
+    <text x="362" y="123" class="t">Telegram Bot</text>
+    <text x="362" y="143" class="s">aiogram</text>
+  </g>
+  <g>
+    <rect x="620" y="90" width="200" height="62" rx="14" fill="#152038" stroke="#2dd4bf" class="box"/>
+    <text x="642" y="123" class="t">Web Client</text>
+    <text x="642" y="143" class="s">REST / Swagger</text>
+  </g>
+
+  <!-- FastAPI -->
+  <rect x="340" y="200" width="480" height="62" rx="14" fill="#13233e" stroke="#86efac" class="box"/>
+  <text x="500" y="233" class="t">FastAPI Backend</text>
+  <text x="500" y="252" class="s">/chat · /crm · /tickets · /metrics · /knowledge</text>
+
+  <!-- LangGraph Agent -->
+  <rect x="460" y="310" width="240" height="66" rx="14" fill="#1a2342" stroke="#818cf8" stroke-width="2.5" class="box"/>
+  <text x="492" y="345" class="t">LangGraph Agent</text>
+  <text x="492" y="365" class="s">stateful dialogue graph</text>
+
+  <!-- LangChain LLM Layer -->
+  <rect x="80" y="430" width="250" height="64" rx="14" fill="#152038" stroke="#c4b5fd" class="box"/>
+  <text x="104" y="463" class="t">LangChain LLM Layer</text>
+  <text x="104" y="483" class="s">prompts · OpenAI / MOCK_LLM</text>
+
+  <!-- Qdrant -->
+  <rect x="465" y="430" width="230" height="64" rx="14" fill="#152038" stroke="#7dd3fc" class="box"/>
+  <text x="489" y="463" class="t">Qdrant Vector DB</text>
+  <text x="489" y="483" class="s">embeddings · similarity</text>
+
+  <!-- Mock CRM Tools -->
+  <rect x="820" y="430" width="260" height="64" rx="14" fill="#152038" stroke="#86efac" class="box"/>
+  <text x="844" y="463" class="t">Mock CRM Tools</text>
+  <text x="844" y="483" class="s">create_lead · get_lead</text>
+
+  <!-- Knowledge Base -->
+  <rect x="465" y="560" width="230" height="62" rx="14" fill="#11203a" stroke="#7dd3fc" stroke-dasharray="5 4" class="box"/>
+  <text x="489" y="592" class="t">Knowledge Base</text>
+  <text x="489" y="611" class="s">7 synthetic .md docs</text>
+
+  <!-- Escalation Tickets -->
+  <rect x="820" y="540" width="260" height="60" rx="14" fill="#152038" stroke="#fca5a5" class="box"/>
+  <text x="844" y="571" class="t">Escalation Tickets</text>
+  <text x="844" y="590" class="s">route to human manager</text>
+
+  <!-- SQLite -->
+  <rect x="360" y="668" width="440" height="64" rx="14" fill="#13233e" stroke="#fcd34d" class="box"/>
+  <text x="384" y="701" class="t">SQLite</text>
+  <text x="384" y="721" class="s">CRM · Tickets · Conversation Memory (repository layer)</text>
+
+  <text x="60" y="788" fill="#64748b" font-size="13">All data synthetic · no real companies, clients or secrets</text>
+</svg>

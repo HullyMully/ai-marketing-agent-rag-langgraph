@@ -1,0 +1,76 @@
+<svg width="1000" height="720" viewBox="0 0 1000 720" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1020"/><stop offset="1" stop-color="#0e1730"/>
+    </linearGradient>
+    <marker id="a3" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#6b7aa0"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="720" fill="url(#bg3)"/>
+  <text x="50" y="48" fill="#f1f5f9" font-size="26" font-weight="700">LangGraph Agent – State Flow</text>
+  <text x="50" y="74" fill="#8aa0c6" font-size="14" letter-spacing="1">classify > retrieve > decide > act</text>
+
+  <!-- edges -->
+  <g stroke="#6b7aa0" stroke-width="2.5" fill="none" marker-end="url(#a3)">
+    <path d="M500 98 V110"/>
+    <path d="M500 166 V206"/>
+    <path d="M500 262 V302"/>
+    <path d="M500 362 L135 438"/>
+    <path d="M500 362 L375 438"/>
+    <path d="M500 362 L615 438"/>
+    <path d="M500 364 L862 438"/>
+    <path d="M135 496 L470 600"/>
+    <path d="M375 496 L490 600"/>
+    <path d="M615 496 L510 600"/>
+    <path d="M862 496 L530 600"/>
+  </g>
+
+  <!-- edge labels -->
+  <g fill="#7c8bb0" font-size="12">
+    <text x="150" y="410" text-anchor="middle">missing info</text>
+    <text x="360" y="424" text-anchor="middle">lead ready</text>
+    <text x="640" y="424" text-anchor="middle">knowledge Q</text>
+    <text x="858" y="410" text-anchor="middle">human / low conf</text>
+  </g>
+
+  <!-- START -->
+  <rect x="430" y="54" width="140" height="44" rx="22" fill="#13233e" stroke="#2dd4bf" stroke-width="2"/>
+  <text x="500" y="82" text-anchor="middle" fill="#2dd4bf" font-size="18" font-weight="700">START</text>
+
+  <!-- classify_intent -->
+  <rect x="375" y="110" width="250" height="56" rx="13" fill="#152038" stroke="#818cf8" stroke-width="2"/>
+  <text x="500" y="144" text-anchor="middle" fill="#e2e8f0" font-size="19" font-weight="600">classify_intent</text>
+
+  <!-- retrieve_knowledge -->
+  <rect x="375" y="206" width="250" height="56" rx="13" fill="#152038" stroke="#7dd3fc" stroke-width="2"/>
+  <text x="500" y="240" text-anchor="middle" fill="#e2e8f0" font-size="19" font-weight="600">retrieve_knowledge</text>
+
+  <!-- decide_action (router) -->
+  <rect x="370" y="302" width="260" height="60" rx="13" fill="#1a2342" stroke="#fcd34d" stroke-width="2.5"/>
+  <text x="500" y="338" text-anchor="middle" fill="#fde68a" font-size="20" font-weight="700">decide_action</text>
+
+  <!-- branches -->
+  <g>
+    <rect x="30" y="438" width="210" height="58" rx="13" fill="#152038" stroke="#c4b5fd" stroke-width="2"/>
+    <text x="135" y="473" text-anchor="middle" fill="#e2e8f0" font-size="16.5" font-weight="600">collect_missing_info</text>
+  </g>
+  <g>
+    <rect x="270" y="438" width="210" height="58" rx="13" fill="#152038" stroke="#86efac" stroke-width="2"/>
+    <text x="375" y="473" text-anchor="middle" fill="#e2e8f0" font-size="17" font-weight="600">call_tool</text>
+  </g>
+  <g>
+    <rect x="510" y="438" width="210" height="58" rx="13" fill="#152038" stroke="#7dd3fc" stroke-width="2"/>
+    <text x="615" y="473" text-anchor="middle" fill="#e2e8f0" font-size="17" font-weight="600">generate_answer</text>
+  </g>
+  <g>
+    <rect x="755" y="438" width="215" height="58" rx="13" fill="#152038" stroke="#fca5a5" stroke-width="2"/>
+    <text x="862" y="473" text-anchor="middle" fill="#e2e8f0" font-size="16.5" font-weight="600">escalate_to_human</text>
+  </g>
+
+  <!-- END -->
+  <rect x="440" y="600" width="120" height="44" rx="22" fill="#13233e" stroke="#fca5a5" stroke-width="2"/>
+  <text x="500" y="628" text-anchor="middle" fill="#fca5a5" font-size="18" font-weight="700">END</text>
+
+  <text x="50" y="690" fill="#64748b" font-size="13">Portfolio case study · fictional agency · synthetic data only</text>
+</svg>

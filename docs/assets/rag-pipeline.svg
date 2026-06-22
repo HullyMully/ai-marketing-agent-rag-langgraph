@@ -1,0 +1,80 @@
+<svg width="1240" height="560" viewBox="0 0 1240 560" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <linearGradient id="bg4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1020"/><stop offset="1" stop-color="#0e1730"/>
+    </linearGradient>
+    <marker id="a4" markerWidth="11" markerHeight="11" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#2dd4bf"/>
+    </marker>
+  </defs>
+  <rect width="1240" height="560" fill="url(#bg4)"/>
+  <text x="50" y="52" fill="#f1f5f9" font-size="26" font-weight="700">RAG Pipeline</text>
+  <text x="50" y="78" fill="#8aa0c6" font-size="14" letter-spacing="1">grounded answers from a synthetic knowledge base</text>
+
+  <!-- arrows -->
+  <g stroke="#2dd4bf" stroke-width="2.5" fill="none" marker-end="url(#a4)" opacity="0.9">
+    <path d="M200 195 H225"/>
+    <path d="M395 195 H420"/>
+    <path d="M590 195 H615"/>
+    <path d="M785 195 H810"/>
+    <path d="M980 195 H1005"/>
+  </g>
+
+  <!-- stage boxes -->
+  <g>
+    <rect x="30" y="150" width="170" height="90" rx="14" fill="#152038" stroke="#7dd3fc" stroke-width="2"/>
+    <text x="115" y="185" text-anchor="middle" fill="#e2e8f0" font-size="17" font-weight="600">Knowledge</text>
+    <text x="115" y="207" text-anchor="middle" fill="#e2e8f0" font-size="17" font-weight="600">Base (.md)</text>
+  </g>
+  <g>
+    <rect x="225" y="150" width="170" height="90" rx="14" fill="#152038" stroke="#818cf8" stroke-width="2"/>
+    <text x="310" y="190" text-anchor="middle" fill="#e2e8f0" font-size="17" font-weight="600">Chunking</text>
+    <text x="310" y="212" text-anchor="middle" fill="#94a3b8" font-size="12">recursive splitter</text>
+  </g>
+  <g>
+    <rect x="420" y="150" width="170" height="90" rx="14" fill="#152038" stroke="#c4b5fd" stroke-width="2"/>
+    <text x="505" y="190" text-anchor="middle" fill="#e2e8f0" font-size="17" font-weight="600">Embeddings</text>
+    <text x="505" y="212" text-anchor="middle" fill="#94a3b8" font-size="12">mock / OpenAI</text>
+  </g>
+  <g>
+    <rect x="615" y="150" width="170" height="90" rx="14" fill="#13233e" stroke="#7dd3fc" stroke-width="2.5"/>
+    <text x="700" y="190" text-anchor="middle" fill="#e2e8f0" font-size="17" font-weight="600">Qdrant</text>
+    <text x="700" y="212" text-anchor="middle" fill="#94a3b8" font-size="12">vector store</text>
+  </g>
+  <g>
+    <rect x="810" y="150" width="170" height="90" rx="14" fill="#152038" stroke="#86efac" stroke-width="2"/>
+    <text x="895" y="190" text-anchor="middle" fill="#e2e8f0" font-size="17" font-weight="600">Retrieval</text>
+    <text x="895" y="212" text-anchor="middle" fill="#94a3b8" font-size="12">top-k similarity</text>
+  </g>
+  <g>
+    <rect x="1005" y="150" width="200" height="90" rx="14" fill="#1a2342" stroke="#fcd34d" stroke-width="2.5"/>
+    <text x="1105" y="190" text-anchor="middle" fill="#fde68a" font-size="17" font-weight="700">Grounded</text>
+    <text x="1105" y="212" text-anchor="middle" fill="#fde68a" font-size="17" font-weight="700">Answer</text>
+  </g>
+
+  <!-- knowledge files list -->
+  <g>
+    <rect x="30" y="300" width="380" height="170" rx="14" fill="#0f1c33" stroke="#1e2c4a" stroke-width="1.5"/>
+    <text x="52" y="332" fill="#7dd3fc" font-size="14" font-weight="600" letter-spacing="1">KNOWLEDGE FILES</text>
+    <g fill="#cbd5e1" font-size="15" font-family="ui-monospace, 'SF Mono', Menlo, monospace">
+      <text x="52" y="362">services.md</text>
+      <text x="220" y="362">pricing.md</text>
+      <text x="52" y="392">faq.md</text>
+      <text x="220" y="392">onboarding.md</text>
+      <text x="52" y="422">campaign_workflow.md</text>
+    </g>
+    <text x="52" y="454" fill="#64748b" font-size="12">+ escalation_policy.md · crm_policy.md (all synthetic)</text>
+  </g>
+  <!-- arrow from files to knowledge base box -->
+  <path d="M115 300 V240" stroke="#7dd3fc" stroke-width="2" fill="none" marker-end="url(#a4)" opacity="0.7"/>
+
+  <!-- user question into retrieval -->
+  <g>
+    <rect x="810" y="340" width="395" height="60" rx="14" fill="#11203a" stroke="#86efac" stroke-width="1.8" stroke-dasharray="5 4"/>
+    <text x="832" y="368" fill="#e2e8f0" font-size="15" font-weight="600">User question</text>
+    <text x="832" y="388" fill="#94a3b8" font-size="13">"How much does a campaign cost?" > embedded > searched</text>
+  </g>
+  <path d="M895 340 V240" stroke="#86efac" stroke-width="2" fill="none" marker-end="url(#a4)" opacity="0.7"/>
+
+  <text x="50" y="520" fill="#64748b" font-size="13">Portfolio case study · fictional agency · synthetic data only</text>
+</svg>

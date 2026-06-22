@@ -1,0 +1,106 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1020"/>
+      <stop offset="1" stop-color="#111a2e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2dd4bf"/>
+      <stop offset="1" stop-color="#818cf8"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#5b6b8c"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <!-- subtle grid -->
+  <g stroke="#1b2540" stroke-width="1" opacity="0.5">
+    <path d="M0 160 H1280 M0 320 H1280 M0 480 H1280"/>
+    <path d="M256 0 V640 M512 0 V640 M768 0 V640 M1024 0 V640"/>
+  </g>
+  <!-- dotted corner accents -->
+  <g fill="#2dd4bf" opacity="0.35">
+    <circle cx="90" cy="90" r="3"/><circle cx="120" cy="90" r="3"/><circle cx="150" cy="90" r="3"/>
+    <circle cx="90" cy="120" r="3"/><circle cx="120" cy="120" r="3"/>
+  </g>
+
+  <!-- header -->
+  <text x="80" y="150" fill="#8aa0c6" font-size="22" letter-spacing="6">PORTFOLIO CASE STUDY · FICTIONAL AGENCY</text>
+  <text x="78" y="232" fill="#f1f5f9" font-size="78" font-weight="700">AI Marketing Agent</text>
+  <text x="80" y="292" font-size="30" font-weight="600">
+    <tspan fill="#2dd4bf">LangGraph</tspan><tspan fill="#5b6b8c"> • </tspan>
+    <tspan fill="#7dd3fc">RAG</tspan><tspan fill="#5b6b8c"> • </tspan>
+    <tspan fill="#a5b4fc">Qdrant</tspan><tspan fill="#5b6b8c"> • </tspan>
+    <tspan fill="#86efac">FastAPI</tspan><tspan fill="#5b6b8c"> • </tspan>
+    <tspan fill="#93c5fd">Telegram</tspan>
+  </text>
+
+  <!-- pipeline -->
+  <g transform="translate(80,400)">
+    <!-- connectors -->
+    <g stroke="#5b6b8c" stroke-width="2.5" marker-end="url(#arr)" fill="none">
+      <path d="M208 70 H252"/>
+      <path d="M460 70 H504"/>
+      <path d="M712 70 H756"/>
+      <path d="M964 70 H1008"/>
+    </g>
+
+    <!-- node: User Chat -->
+    <g>
+      <rect x="8" y="20" width="200" height="100" rx="16" fill="#152038" stroke="#2dd4bf" stroke-width="2"/>
+      <circle cx="48" cy="58" r="14" fill="none" stroke="#2dd4bf" stroke-width="2.5"/>
+      <path d="M34 92 q14 -20 28 0" fill="none" stroke="#2dd4bf" stroke-width="2.5"/>
+      <text x="78" y="56" fill="#e2e8f0" font-size="20" font-weight="600">User</text>
+      <text x="78" y="82" fill="#94a3b8" font-size="16">Chat / Bot</text>
+    </g>
+
+    <!-- node: LangGraph Agent -->
+    <g>
+      <rect x="252" y="20" width="208" height="100" rx="16" fill="#16213c" stroke="#818cf8" stroke-width="2" filter="url(#glow)"/>
+      <g transform="translate(286,44)" stroke="#818cf8" stroke-width="2.5" fill="#16213c">
+        <circle cx="0" cy="0" r="6"/><circle cx="34" cy="-6" r="6"/><circle cx="30" cy="26" r="6"/>
+        <path d="M5 2 L29 22 M5 -1 L29 -6" stroke-width="2"/>
+      </g>
+      <text x="338" y="56" fill="#e2e8f0" font-size="20" font-weight="600">LangGraph</text>
+      <text x="338" y="82" fill="#94a3b8" font-size="16">Agent</text>
+    </g>
+
+    <!-- node: RAG / Qdrant -->
+    <g>
+      <rect x="504" y="20" width="208" height="100" rx="16" fill="#152038" stroke="#7dd3fc" stroke-width="2"/>
+      <g transform="translate(540,42)" stroke="#7dd3fc" stroke-width="2.5" fill="none">
+        <ellipse cx="0" cy="0" rx="16" ry="6"/><path d="M-16 0 v20 a16 6 0 0 0 32 0 v-20"/>
+      </g>
+      <text x="572" y="56" fill="#e2e8f0" font-size="20" font-weight="600">RAG</text>
+      <text x="572" y="82" fill="#94a3b8" font-size="16">Qdrant DB</text>
+    </g>
+
+    <!-- node: CRM Tools -->
+    <g>
+      <rect x="756" y="20" width="208" height="100" rx="16" fill="#152038" stroke="#86efac" stroke-width="2"/>
+      <g transform="translate(790,40)" stroke="#86efac" stroke-width="2.5" fill="none">
+        <rect x="-10" y="0" width="36" height="26" rx="4"/><path d="M-10 9 H26"/>
+      </g>
+      <text x="826" y="56" fill="#e2e8f0" font-size="20" font-weight="600">CRM</text>
+      <text x="826" y="82" fill="#94a3b8" font-size="16">Lead Tools</text>
+    </g>
+
+    <!-- node: Human Escalation -->
+    <g>
+      <rect x="1008" y="20" width="200" height="100" rx="16" fill="#152038" stroke="#fca5a5" stroke-width="2"/>
+      <g transform="translate(1042,40)" stroke="#fca5a5" stroke-width="2.5" fill="none">
+        <circle cx="2" cy="6" r="9"/><path d="M-12 30 q14 -18 28 0"/>
+      </g>
+      <text x="1074" y="56" fill="#e2e8f0" font-size="20" font-weight="600">Human</text>
+      <text x="1074" y="82" fill="#94a3b8" font-size="16">Escalation</text>
+    </g>
+  </g>
+
+  <!-- footer accent bar -->
+  <rect x="80" y="600" width="220" height="5" rx="3" fill="url(#accent)"/>
+</svg>
