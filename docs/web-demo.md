@@ -1,47 +1,50 @@
 # Web demo
 
-The project ships a small browser UI served by the FastAPI app — no build step,
-just HTML, CSS and JavaScript.
+A small browser UI for the agent, served by the same FastAPI app. It's handy for
+trying the flows and for capturing screenshots.
 
-## Run the app
+## Run it
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env            # demo mode works out of the box
-python scripts/ingest_knowledge.py
+cp .env.example .env                  # defaults to offline mode (no API keys)
+python scripts/ingest_knowledge.py    # index the knowledge base
 uvicorn app.main:app --reload
 ```
 
-## Open the pages
+Then open:
 
-- Landing page: <http://localhost:8000/>
-- Web chat demo: <http://localhost:8000/demo>
-- API docs (Swagger): <http://localhost:8000/docs>
-- Health check: <http://localhost:8000/health>
-- Demo metrics: <http://localhost:8000/metrics/demo>
+- `http://localhost:8000/` — landing page
+- `http://localhost:8000/demo` — chat demo
+- `http://localhost:8000/docs` — API docs
+- `http://localhost:8000/metrics/demo` — demo metrics (JSON)
 
-The chat page generates a random `session_id` (kept in `localStorage`) and posts
-to the existing `POST /chat` endpoint. The right panel shows the agent's intent,
-action and any created lead or ticket id from the response.
+The demo runs against the real `POST /chat` endpoint. The right-hand panel reads
+back the created lead (`GET /crm/leads`), ticket (`GET /tickets/{id}`) and metrics
+(`GET /metrics/demo`), so it shows actual backend data, not placeholders.
 
-## Demo scenarios
+## Scenarios
 
-The left sidebar has one-click scenarios:
+The sidebar buttons each start a fresh session and run a short flow:
 
-1. **Ask about services** — answered from the knowledge base (RAG).
-2. **Ask about pricing** — pricing answered from the knowledge base.
-3. **Create a lead** — provides name, company, budget and a `.example` contact;
-   the agent qualifies and stores a lead.
-4. **Ask for human manager** — triggers an escalation ticket.
-5. **Follow-up with memory** — relies on earlier turns in the same session.
+- **Services Q&A** — answered from the knowledge base (RAG)
+- **Pricing from RAG** — pricing answered from the knowledge base
+- **Lead creation flow** — captures a lead and shows the lead card
+- **Human escalation** — opens a ticket and shows the ticket card
+- **Memory follow-up** — two turns; the agent reuses details from the first
 
-All demo data is fictional. Sample emails use the `.example` domain.
+You can also type your own message. **Screenshot mode** (top-right) hides the
+debug-style details and tightens the layout for clean captures.
 
-## Troubleshooting
+## Suggested screenshots
 
-- **`/` returns Not Found** — an older build is running. Restart with the latest
-  code: `uvicorn app.main:app --reload`.
-- **Chat fails or returns an error bubble** — confirm the API is healthy at
-  `/health` and inspect `POST /chat` in `/docs`.
-- **RAG answers look generic** — run knowledge ingestion:
-  `python scripts/ingest_knowledge.py`.
+Capture at 1440×900 (1600×900 also works):
+
+1. **Landing page** — `/`
+2. **Lead creation flow** — run the scenario, then turn on Screenshot mode
+3. **Escalation flow** — run the scenario; the ticket card is visible
+4. **API docs** — `/docs`
+5. **Demo metrics** — the metrics card, or `/metrics/demo`
+
+Keep tokens and any personal data out of frame. All demo data is fictional and
+uses the `.example` domain.

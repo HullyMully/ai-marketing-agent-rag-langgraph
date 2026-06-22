@@ -1,176 +1,271 @@
-/* AI Marketing Agent — web demo client.
-   Plain JS, no dependencies. Talks to the existing POST /chat endpoint. */
+/* NovaGrowth AI Marketing Agent — web demo client.
+   Plain JS, no dependencies. Talks to the FastAPI backend (POST /chat,
+   GET /crm/leads, GET /tickets/{id}, GET /metrics/demo). */
 (function () {
   "use strict";
 
   var SESSION_KEY = "novagrowth_demo_session_id";
 
+  /* Scenario messages. Strings run as one turn; arrays run as several turns
+     in the same session (used to demonstrate memory). */
   var SCENARIOS = {
-    services: "What services does NovaGrowth Agency provide?",
-    pricing: "What pricing packages are available?",
-    lead: "Hi, my name is Sam. I work at BrightDesk. We need help with paid ads " +
-          "and have a budget around $5k/month. Contact me at sam@brightdesk.example.",
-    human: "I need a human manager for a custom enterprise workflow.",
-    memory: "Can you remember my company and suggest the next step?"
+    services: "What services does NovaGrowth offer?",
+    pricing: "How much does a campaign cost? What pricing packages do you have?",
+    lead:
+      "Hi, my name is Sam. I work at BrightDesk. We need help launching paid ads " +
+      "for our SaaS product. Budget is around $5k/month. Contact me at " +
+      "sam@brightdesk.example.",
+    human: "I need a human manager for a custom enterprise marketing workflow.",
+    memory: [
+      "I want to start SEO for my online store, I'm Priya.",
+      "My email is priya@studio.example"
+    ]
   };
 
   var chat = document.getElementById("chat");
   var form = document.getElementById("chat-form");
   var input = document.getElementById("message");
   var sendBtn = document.getElementById("send");
-  var clearBtn = document.getElementById("clear");
-  var sessionEl = document.getElementById("session");
+  var resetBtn = document.getElementById("reset");
+  var shotBtn = document.getElementById("shot-toggle");
 
-  var panel = {
-    intent: document.getElementById("intent"),
-    action: document.getElementById("action"),
-    escalated: document.getElementById("escalated"),
-    lead: document.getElementById("lead"),
-    ticket: document.getElementById("ticket"),
-    sources: document.getElementById("sources")
+  var els = {
+    empty: document.getElementById("result-empty"),
+    result: document.getElementById("result"),
+    cardLead: document.getElementById("card-lead"),
+    cardTicket: document.getElementById("card-ticket"),
+    cardMetrics: document.getElementById("card-metrics"),
+    leadCompany: document.getElementById("lead-company"),
+    leadContact: document.getElementById("lead-contact"),
+    leadService: document.getElementById("lead-service"),
+    leadBudget: document.getElementById("lead-budget"),
+    leadStatus: document.getElementById("lead-status"),
+    ticketId: document.getElementById("ticket-id"),
+    ticketReason: document.getElementById("ticket-reason"),
+    ticketPriority: document.getElementById("ticket-priority"),
+    ticketStatus: document.getElementById("ticket-status"),
+    dIntent: document.getElementById("d-intent"),
+    dAction: document.getElementById("d-action"),
+    dEscalated: document.getElementById("d-escalated"),
+    dSources: document.getElementById("d-sources"),
+    mConvos: document.getElementById("m-convos"),
+    mLeads: document.getElementById("m-leads"),
+    mTickets: document.getElementById("m-tickets"),
+    mResolved: document.getElementById("m-resolved")
   };
 
+  var WELCOME = chat.innerHTML;
   var busy = false;
 
+  /* ---------- session ---------- */
   function newSessionId() {
-    var rnd = Math.random().toString(36).slice(2, 10);
+    var rnd = Math.random().toString(36).slice(2, 8);
     return "web-demo-" + Date.now().toString(36) + "-" + rnd;
   }
-
   function getSessionId() {
     var id = localStorage.getItem(SESSION_KEY);
-    if (!id) {
-      id = newSessionId();
-      localStorage.setItem(SESSION_KEY, id);
-    }
+    if (!id) { id = newSessionId(); localStorage.setItem(SESSION_KEY, id); }
+    return id;
+  }
+  function resetSession() {
+    var id = newSessionId();
+    localStorage.setItem(SESSION_KEY, id);
     return id;
   }
 
-  function setText(el, value, cls) {
-    el.textContent = (value === null || value === undefined || value === "") ? "—" : value;
-    el.className = "kv-val" + (cls ? " " + cls : "");
-  }
-
-  function scrollToBottom() {
-    chat.scrollTop = chat.scrollHeight;
-  }
+  /* ---------- chat rendering ---------- */
+  function scrollToBottom() { chat.scrollTop = chat.scrollHeight; }
 
   function addMessage(role, text) {
     var wrap = document.createElement("div");
     wrap.className = "msg " + role;
+    if (role === "assistant") {
+      var av = document.createElement("span");
+      av.className = "avatar"; av.setAttribute("aria-hidden", "true");
+      av.textContent = "N";
+      wrap.appendChild(av);
+    }
     var bubble = document.createElement("div");
     bubble.className = "bubble";
     bubble.textContent = text;
     wrap.appendChild(bubble);
     chat.appendChild(wrap);
     scrollToBottom();
-    return bubble;
+    return wrap;
   }
 
-  function addLoading() {
+  function showTyping() {
     var wrap = document.createElement("div");
-    wrap.className = "msg assistant";
-    var bubble = document.createElement("div");
-    bubble.className = "bubble loading";
-    bubble.textContent = "Thinking…";
-    wrap.appendChild(bubble);
+    wrap.className = "msg assistant typing";
+    wrap.innerHTML = '<span class="avatar" aria-hidden="true">N</span>' +
+                     '<div class="bubble">typing…</div>';
     chat.appendChild(wrap);
     scrollToBottom();
     return wrap;
   }
 
-  function updatePanel(data) {
-    // The /chat response includes rich metadata; fall back gracefully if not.
-    if (!data || typeof data !== "object") {
-      setText(panel.intent, "demo response");
-      setText(panel.action, "see backend logs / API docs");
-      return;
-    }
-    setText(panel.intent, data.intent || "demo response", data.intent ? "active" : null);
-    setText(panel.action, data.action_taken || "see backend logs / API docs");
-    setText(panel.escalated, data.escalated ? "yes" : "no", data.escalated ? "alert" : null);
-    setText(panel.lead, data.created_lead_id);
-    setText(panel.ticket, data.created_ticket_id);
-    if (data.sources && data.sources.length) {
-      setText(panel.sources, data.sources.join(", "));
-    } else {
-      setText(panel.sources, "—");
-    }
-  }
-
+  /* ---------- result panel ---------- */
   function setBusy(state) {
     busy = state;
     sendBtn.disabled = state;
     input.disabled = state;
   }
 
-  async function sendMessage(text) {
-    if (busy || !text.trim()) return;
-    addMessage("user", text);
-    input.value = "";
-    setBusy(true);
-    var loading = addLoading();
+  function showResult() {
+    els.empty.classList.add("hidden");
+    els.result.classList.remove("hidden");
+  }
 
-    try {
-      var resp = await fetch("/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          session_id: getSessionId(),
-          user_message: text,
-          user_id: "web-demo-user"
-        })
-      });
+  function updateDetails(data) {
+    els.dIntent.textContent = data.intent || "—";
+    els.dAction.textContent = data.action_taken || "—";
+    els.dEscalated.textContent = data.escalated ? "yes" : "no";
+    els.dSources.textContent =
+      (data.sources && data.sources.length) ? data.sources.join(", ") : "—";
+  }
 
-      chat.removeChild(loading);
+  function get(url) {
+    return fetch(url).then(function (r) { return r.ok ? r.json() : null; })
+                     .catch(function () { return null; });
+  }
 
-      if (!resp.ok) {
-        addMessage("error", "Request failed (" + resp.status + "). Check /health and /docs.");
-        return;
-      }
+  function fillLead(lead) {
+    if (!lead) { return; }
+    els.leadCompany.textContent = lead.company || "—";
+    els.leadContact.textContent = lead.contact || "—";
+    els.leadService.textContent = lead.service_interest || "—";
+    els.leadBudget.textContent = lead.budget_range || "—";
+    els.leadStatus.textContent = lead.status || "new";
+    els.cardLead.classList.remove("hidden");
+  }
 
-      var data = await resp.json();
-      addMessage("assistant", data.answer || "(no answer returned)");
-      updatePanel(data);
-    } catch (err) {
-      if (loading.parentNode) chat.removeChild(loading);
-      addMessage("error", "Could not reach the server. Is the API running?");
-    } finally {
-      setBusy(false);
-      input.focus();
+  function fillTicket(ticket) {
+    if (!ticket) { return; }
+    els.ticketId.textContent = "TCK-" + ticket.id;
+    els.ticketReason.textContent = (ticket.reason || "").replace(/_/g, " ");
+    els.ticketPriority.textContent = ticket.priority || "—";
+    els.ticketStatus.textContent = ticket.status || "—";
+    els.cardTicket.classList.remove("hidden");
+  }
+
+  function refreshMetrics() {
+    return get("/metrics/demo").then(function (m) {
+      if (!m) { return; }
+      els.mConvos.textContent = m.conversations;
+      els.mLeads.textContent = m.leads;
+      els.mTickets.textContent = m.tickets;
+      els.mResolved.textContent = Math.round((m.resolved_by_ai_rate || 0) * 100) + "%";
+      els.cardMetrics.classList.remove("hidden");
+    });
+  }
+
+  function updateResult(data) {
+    showResult();
+    updateDetails(data);
+    els.cardLead.classList.add("hidden");
+    els.cardTicket.classList.add("hidden");
+
+    var jobs = [];
+    if (data.created_lead_id) {
+      jobs.push(get("/crm/leads").then(function (leads) {
+        if (!leads) { return; }
+        for (var i = 0; i < leads.length; i++) {
+          if (leads[i].id === data.created_lead_id) { fillLead(leads[i]); break; }
+        }
+      }));
     }
+    if (data.created_ticket_id) {
+      jobs.push(get("/tickets/" + data.created_ticket_id).then(fillTicket));
+    }
+    jobs.push(refreshMetrics());
+    return Promise.all(jobs);
   }
 
-  function clearSession() {
-    var id = newSessionId();
-    localStorage.setItem(SESSION_KEY, id);
-    sessionEl.textContent = id;
-    chat.innerHTML = "";
-    addMessage("assistant",
-      "New session started. Ask a question or pick a scenario on the left.");
-    updatePanel(null);
-    setText(panel.escalated, "—");
-    setText(panel.lead, "—");
-    setText(panel.ticket, "—");
-    setText(panel.sources, "—");
+  /* ---------- send ---------- */
+  function sendMessage(text) {
+    if (!text || busy) { return Promise.resolve(); }
+    setBusy(true);
+    addMessage("user", text);
+    var typing = showTyping();
+
+    return fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: getSessionId(), user_message: text })
+    })
+      .then(function (r) {
+        if (!r.ok) { throw new Error("HTTP " + r.status); }
+        return r.json();
+      })
+      .then(function (data) {
+        typing.remove();
+        addMessage("assistant", data.answer || "…");
+        return updateResult(data);
+      })
+      .catch(function () {
+        typing.remove();
+        addMessage("assistant",
+          "Sorry — I couldn't reach the backend. Make sure the API is running.");
+      })
+      .finally(function () { setBusy(false); input.focus(); });
   }
 
-  // --- wire up events ---
+  /* ---------- scenarios ---------- */
+  function resetConversation() {
+    resetSession();
+    chat.innerHTML = WELCOME;
+    els.result.classList.add("hidden");
+    els.empty.classList.remove("hidden");
+    refreshMetrics();
+  }
+
+  function runScenario(key, btn) {
+    if (busy) { return; }
+    var steps = SCENARIOS[key];
+    if (!steps) { return; }
+    if (typeof steps === "string") { steps = [steps]; }
+
+    document.querySelectorAll(".scenario").forEach(function (b) {
+      b.classList.remove("active");
+    });
+    if (btn) { btn.classList.add("active"); }
+
+    // fresh session so each scenario is a clean, repeatable demo
+    resetSession();
+    chat.innerHTML = WELCOME;
+
+    var chain = Promise.resolve();
+    steps.forEach(function (msg) {
+      chain = chain.then(function () { return sendMessage(msg); });
+    });
+    return chain;
+  }
+
+  /* ---------- wiring ---------- */
   form.addEventListener("submit", function (e) {
     e.preventDefault();
-    sendMessage(input.value);
+    var text = input.value.trim();
+    if (!text) { return; }
+    input.value = "";
+    sendMessage(text);
   });
-
-  clearBtn.addEventListener("click", clearSession);
 
   document.querySelectorAll(".scenario").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      var msg = SCENARIOS[btn.getAttribute("data-scenario")];
-      if (msg) sendMessage(msg);
+      runScenario(btn.getAttribute("data-scenario"), btn);
     });
   });
 
-  // --- init ---
-  sessionEl.textContent = getSessionId();
-  input.focus();
+  if (resetBtn) {
+    resetBtn.addEventListener("click", resetConversation);
+  }
+
+  shotBtn.addEventListener("click", function () {
+    var on = document.body.classList.toggle("shot");
+    shotBtn.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+
+  // init
+  getSessionId();
+  refreshMetrics();
 })();

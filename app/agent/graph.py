@@ -127,10 +127,13 @@ def call_tool_node(state: AgentState) -> AgentState:
     memory.clear_slots(state["session_id"])
 
     svc = slots.get("service_interest", "your goals")
+    company = slots.get("company")
+    for_company = f" for {company}" if company else ""
     state["answer"] = (
-        f"You're all set, {slots.get('name', 'there')}! I've created a lead "
-        f"(#{lead['id']}) for {svc} and a NovaGrowth specialist will reach out "
-        f"to {slots.get('contact')} shortly. Anything else I can help with?"
+        f"You're all set, {slots.get('name', 'there')}! I've created a lead"
+        f"{for_company} (#{lead['id']}) for {svc}. A NovaGrowth manager will "
+        f"follow up with you at {slots.get('contact')} shortly. "
+        "Anything else I can help with?"
     )
     return state
 

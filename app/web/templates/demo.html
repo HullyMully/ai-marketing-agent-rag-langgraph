@@ -3,84 +3,122 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Marketing Agent — Web Demo</title>
+  <title>NovaGrowth AI Marketing Agent — Demo</title>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body class="demo">
   <header class="demo-header">
     <div class="brand">
-      <div class="logo-dot"></div>
-      <span class="brand-name">AI Marketing Agent</span>
-      <a class="brand-link" href="/">Home</a>
+      <span class="logo-dot" aria-hidden="true"></span>
+      <span class="brand-name">NovaGrowth AI Assistant</span>
+      <span class="brand-status">online</span>
     </div>
-    <span class="badge">Demo mode</span>
+    <div class="header-actions">
+      <button id="shot-toggle" class="btn btn-ghost" type="button" aria-pressed="false">
+        Screenshot mode
+      </button>
+      <a class="btn btn-ghost" href="/">Home</a>
+    </div>
   </header>
 
-  <div class="demo-grid">
-    <!-- Left sidebar -->
+  <main class="demo-grid">
+    <!-- Left: scenarios -->
     <aside class="panel sidebar-left">
-      <h2 class="panel-title">Demo scenarios</h2>
+      <h2 class="panel-title">Scenarios</h2>
       <div class="scenario-list">
-        <button class="scenario" data-scenario="services">1. Ask about services</button>
-        <button class="scenario" data-scenario="pricing">2. Ask about pricing</button>
-        <button class="scenario" data-scenario="lead">3. Create a lead</button>
-        <button class="scenario" data-scenario="human">4. Ask for human manager</button>
-        <button class="scenario" data-scenario="memory">5. Follow-up with memory</button>
+        <button class="scenario" data-scenario="services">Services Q&amp;A</button>
+        <button class="scenario" data-scenario="pricing">Pricing from RAG</button>
+        <button class="scenario" data-scenario="lead">Lead creation flow</button>
+        <button class="scenario" data-scenario="human">Human escalation</button>
+        <button class="scenario" data-scenario="memory">Memory follow-up</button>
       </div>
-
-      <h2 class="panel-title">Architecture</h2>
-      <ul class="arch-list">
-        <li>FastAPI</li>
-        <li>LangGraph</li>
-        <li>RAG</li>
-        <li>Qdrant</li>
-        <li>SQLite</li>
-        <li>Telegram bot</li>
-      </ul>
+      <p class="hint">Pick a scenario, or type your own message.</p>
+      <button id="reset" type="button" class="btn btn-ghost btn-block hide-on-shot">
+        Reset conversation
+      </button>
     </aside>
 
-    <!-- Main chat -->
+    <!-- Center: chat -->
     <section class="panel chat-area">
       <div id="chat" class="chat-window" aria-live="polite">
         <div class="msg assistant">
+          <span class="avatar" aria-hidden="true">N</span>
           <div class="bubble">
-            Hi, I'm the NovaGrowth assistant. Ask about our services, pricing or
-            campaigns — or pick a scenario on the left.
+            Hi, I'm the NovaGrowth assistant. I can explain our services and pricing,
+            help you start a project, or connect you with a manager. How can I help?
           </div>
         </div>
       </div>
 
       <form id="chat-form" class="chat-input" autocomplete="off">
-        <input id="message" type="text" placeholder="Type a message…" aria-label="Message" required>
+        <input id="message" type="text" placeholder="Type a message…"
+               aria-label="Message" required>
         <button id="send" type="submit" class="btn btn-primary">Send</button>
-        <button id="clear" type="button" class="btn">Clear session</button>
       </form>
     </section>
 
-    <!-- Right sidebar -->
+    <!-- Right: demo result -->
     <aside class="panel sidebar-right">
-      <h2 class="panel-title">Agent actions</h2>
-      <div class="kv">
-        <div class="kv-row"><span class="kv-key">Intent</span><span id="intent" class="kv-val">—</span></div>
-        <div class="kv-row"><span class="kv-key">Action</span><span id="action" class="kv-val">—</span></div>
-        <div class="kv-row"><span class="kv-key">Escalated</span><span id="escalated" class="kv-val">—</span></div>
-        <div class="kv-row"><span class="kv-key">Lead ID</span><span id="lead" class="kv-val">—</span></div>
-        <div class="kv-row"><span class="kv-key">Ticket ID</span><span id="ticket" class="kv-val">—</span></div>
-        <div class="kv-row"><span class="kv-key">Sources</span><span id="sources" class="kv-val">—</span></div>
+      <h2 class="panel-title">Demo result</h2>
+
+      <div id="result-empty" class="result-empty">
+        <p class="empty-lead">Choose a scenario or type a message.</p>
+        <div class="mini-cards">
+          <div class="mini-card"><span class="mini-icon ic-rag"></span>RAG answers</div>
+          <div class="mini-card"><span class="mini-icon ic-crm"></span>CRM actions</div>
+          <div class="mini-card"><span class="mini-icon ic-esc"></span>Human escalation</div>
+        </div>
       </div>
 
-      <h2 class="panel-title">Demo data</h2>
-      <div class="kv">
-        <div class="kv-row"><span class="kv-key">Session</span><span id="session" class="kv-val mono">—</span></div>
+      <div id="result" class="result hidden">
+        <div id="card-lead" class="card card-lead hidden">
+          <div class="card-head"><span class="dot dot-green"></span>Lead created</div>
+          <dl class="card-body">
+            <div><dt>Company</dt><dd id="lead-company">—</dd></div>
+            <div><dt>Contact</dt><dd id="lead-contact">—</dd></div>
+            <div><dt>Service</dt><dd id="lead-service">—</dd></div>
+            <div><dt>Budget</dt><dd id="lead-budget">—</dd></div>
+            <div><dt>Status</dt><dd><span id="lead-status" class="pill pill-green">new</span></dd></div>
+          </dl>
+        </div>
+
+        <div id="card-ticket" class="card card-ticket hidden">
+          <div class="card-head"><span class="dot dot-amber"></span>Ticket created</div>
+          <dl class="card-body">
+            <div><dt>Ticket</dt><dd id="ticket-id">—</dd></div>
+            <div><dt>Reason</dt><dd id="ticket-reason">—</dd></div>
+            <div><dt>Priority</dt><dd><span id="ticket-priority" class="pill pill-amber">—</span></dd></div>
+            <div><dt>Status</dt><dd><span id="ticket-status" class="pill">—</span></dd></div>
+          </dl>
+        </div>
+
+        <div class="card card-details hide-on-shot">
+          <div class="card-head muted">Details</div>
+          <dl class="card-body">
+            <div><dt>Intent</dt><dd id="d-intent">—</dd></div>
+            <div><dt>Action</dt><dd id="d-action">—</dd></div>
+            <div><dt>Escalated</dt><dd id="d-escalated">—</dd></div>
+            <div><dt>Sources</dt><dd id="d-sources">—</dd></div>
+          </dl>
+        </div>
       </div>
 
-      <h2 class="panel-title">Links</h2>
-      <div class="link-list">
-        <a class="btn btn-sm" href="/docs">API Docs</a>
-        <a class="btn btn-sm" href="/metrics/demo">Demo Metrics</a>
+      <div id="card-metrics" class="card card-metrics hidden">
+        <div class="card-head muted">Demo metrics</div>
+        <div class="metric-row">
+          <div class="metric"><span id="m-convos" class="metric-num">—</span><span class="metric-lbl">Conversations</span></div>
+          <div class="metric"><span id="m-leads" class="metric-num">—</span><span class="metric-lbl">Leads</span></div>
+          <div class="metric"><span id="m-tickets" class="metric-num">—</span><span class="metric-lbl">Tickets</span></div>
+          <div class="metric"><span id="m-resolved" class="metric-num">—</span><span class="metric-lbl">Resolved by AI</span></div>
+        </div>
+      </div>
+
+      <div class="links hide-on-shot">
+        <a class="btn btn-sm" href="/docs">API docs</a>
+        <a class="btn btn-sm" href="/metrics/demo">Metrics JSON</a>
       </div>
     </aside>
-  </div>
+  </main>
 
   <script src="/static/demo.js" defer></script>
 </body>

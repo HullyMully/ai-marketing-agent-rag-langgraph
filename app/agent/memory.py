@@ -21,8 +21,14 @@ _SLOT_STORE: dict[str, dict[str, str]] = {}
 
 _EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 _NAME_RE = re.compile(r"\b(?i:my name is|i am|i'm|this is)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)")
-_COMPANY_RE = re.compile(r"\b(?i:company is|company:|work at|we are|we're)\s+([A-Z][\w&.\- ]{1,40})")
-_BUDGET_RE = re.compile(r"\$\s?[\d,]+(?:\s?(?:k|/mo|per month|a month))?", re.IGNORECASE)
+_COMPANY_RE = re.compile(
+    r"\b(?i:company is|company:|work at|we are|we're)\s+"
+    r"([A-Z][A-Za-z0-9&]+(?:\s+[A-Z][A-Za-z0-9&]+){0,3})"
+)
+_BUDGET_RE = re.compile(
+    r"\$\s?[\d,]+\s?[km]?(?:\s?/?\s?(?:per month|a month|months|month|mo))?",
+    re.IGNORECASE,
+)
 
 _SERVICE_KEYWORDS = {
     "Paid Advertising": ["ppc", "paid ads", "google ads", "meta ads", "ads", "advertising"],
