@@ -1,5 +1,7 @@
 # Web demo
 
+🇺🇸English | [🇷🇺Русский](./web-demo.ru.md)
+
 The FastAPI app serves a small dark-themed UI alongside the API. It shares one
 design system across every page, so the landing, chat, API overview and metrics
 all look like one internal product.

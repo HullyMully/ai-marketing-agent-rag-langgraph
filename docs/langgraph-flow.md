@@ -1,5 +1,7 @@
 # LangGraph flow
 
+🇺🇸English | [🇷🇺Русский](./langgraph-flow.ru.md)
+
 The agent is a compiled `StateGraph` (see `app/agent/graph.py`). State is a
 `TypedDict` (`app/agent/state.py`) threaded through every node.
 

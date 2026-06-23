@@ -1,5 +1,7 @@
 # Screenshots and visual assets
 
+🇺🇸English | [🇷🇺Русский](./README.ru.md)
+
 These visuals are demo assets for the portfolio case study. They use fictional
 data only.
 

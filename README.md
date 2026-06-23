@@ -1,4 +1,4 @@
-# NovaGrowth AI Marketing Agent 🤖📈
+# NovaGrowth AI Marketing Agent 
 
 A conversational AI agent for a **fictional** digital marketing agency – built with
 **LangGraph**, **RAG (Qdrant)**, **FastAPI**, a **Telegram bot**, a **mock CRM**,
@@ -12,7 +12,7 @@ support tickets and human escalation.
 [![LangGraph](https://img.shields.io/badge/LangGraph-stateful%20agent-orange)](https://langchain-ai.github.io/langgraph/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-🇷🇺 Russian version: [README.ru.md](README.ru.md)
+🇺🇸English | [🇷🇺Русский](./README.ru.md)
 
 ---
 
@@ -286,14 +286,16 @@ auth, evaluation harness, richer analytics dashboard, and more.
 
 ## Documentation
 
-- [docs/architecture.md](docs/architecture.md)
-- [docs/langgraph-flow.md](docs/langgraph-flow.md)
-- [docs/rag.md](docs/rag.md)
-- [docs/api.md](docs/api.md)
-- [docs/demo-scenarios.md](docs/demo-scenarios.md)
-- [docs/portfolio-case-study.md](docs/portfolio-case-study.md)
-- [docs/limitations.md](docs/limitations.md)
-- [docs/roadmap.md](docs/roadmap.md)
+- [Architecture](docs/architecture.md) / [RU](docs/architecture.ru.md)
+- [API](docs/api.md) / [RU](docs/api.ru.md)
+- [RAG](docs/rag.md) / [RU](docs/rag.ru.md)
+- [LangGraph flow](docs/langgraph-flow.md) / [RU](docs/langgraph-flow.ru.md)
+- [Web demo](docs/web-demo.md) / [RU](docs/web-demo.ru.md)
+- [Demo walkthrough](docs/demo/demo-walkthrough.md) / [RU](docs/demo/demo-walkthrough.ru.md)
+- [Portfolio case study](docs/portfolio-case-study.md) / [RU](docs/portfolio-case-study.ru.md)
+- [Limitations](docs/limitations.md) / [RU](docs/limitations.ru.md)
+- [Roadmap](docs/roadmap.md) / [RU](docs/roadmap.ru.md)
+- [Screenshots](docs/screenshots/README.md) / [RU](docs/screenshots/README.ru.md)
 
 ## License
 

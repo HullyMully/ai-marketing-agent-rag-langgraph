@@ -1,5 +1,7 @@
 # Portfolio case study – NovaGrowth AI Marketing Agent
 
+🇺🇸English | [🇷🇺Русский](./portfolio-case-study.ru.md)
+
 > **This is a fictional business case and a portfolio prototype.** "NovaGrowth
 > Agency" is not a real company, and this work was **not** done for any real
 > client. It is a *realistic demo scenario* **inspired by common marketing agency

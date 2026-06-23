@@ -1,5 +1,7 @@
 # RAG (Retrieval-Augmented Generation)
 
+🇺🇸English | [🇷🇺Русский](./rag.ru.md)
+
 The agent answers service / pricing / workflow questions from a small markdown
 knowledge base rather than from the LLM's parametric memory.
 

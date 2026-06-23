@@ -1,5 +1,7 @@
 # Demo walkthrough
 
+🇺🇸English | [🇷🇺Русский](./demo-walkthrough.ru.md)
+
 Five end-to-end flows for the **NovaGrowth AI Marketing Agent**. Everything runs
 in offline mode (`MOCK_LLM=true`, mock embeddings), so no API keys are needed.
 

@@ -1,5 +1,7 @@
 # Architecture
 
+🇺🇸English | [🇷🇺Русский](./architecture.ru.md)
+
 > Portfolio prototype for the fictional **NovaGrowth Agency**. All data is synthetic.
 
 ## Overview

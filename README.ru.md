@@ -1,4 +1,4 @@
-# NovaGrowth AI Marketing Agent 🤖📈
+# NovaGrowth AI Marketing Agent 
 
 Разговорный ИИ-агент для **вымышленного** агентства цифрового маркетинга – на
 **LangGraph**, **RAG (Qdrant)**, **FastAPI**, с **Telegram-ботом**, **мок-CRM**,
@@ -7,7 +7,12 @@
 > **Портфолио-кейс для вымышленного digital-агентства. Все данные в демо являются тестовыми.**
 > NovaGrowth Agency – не реальная компания, проект не связан ни с каким реальным бизнесом.
 
-🇬🇧 English version: [README.md](README.md)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688)](https://fastapi.tiangolo.com/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-stateful%20agent-orange)](https://langchain-ai.github.io/langgraph/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+
+ [🇺🇸English](./README.md) | 🇷🇺Русский
 
 ---
 
@@ -274,14 +279,16 @@ curl http://localhost:8000/metrics/demo
 
 ## Документация
 
-- [docs/architecture.md](docs/architecture.md)
-- [docs/langgraph-flow.md](docs/langgraph-flow.md)
-- [docs/rag.md](docs/rag.md)
-- [docs/api.md](docs/api.md)
-- [docs/demo-scenarios.md](docs/demo-scenarios.md)
-- [docs/portfolio-case-study.md](docs/portfolio-case-study.md)
-- [docs/limitations.md](docs/limitations.md)
-- [docs/roadmap.md](docs/roadmap.md)
+- [Архитектура](docs/architecture.ru.md) / [EN](docs/architecture.md)
+- [API](docs/api.ru.md) / [EN](docs/api.md)
+- [RAG](docs/rag.ru.md) / [EN](docs/rag.md)
+- [LangGraph flow](docs/langgraph-flow.ru.md) / [EN](docs/langgraph-flow.md)
+- [Веб-демо](docs/web-demo.ru.md) / [EN](docs/web-demo.md)
+- [Разбор демо](docs/demo/demo-walkthrough.ru.md) / [EN](docs/demo/demo-walkthrough.md)
+- [Кейс для портфолио](docs/portfolio-case-study.ru.md) / [EN](docs/portfolio-case-study.md)
+- [Ограничения](docs/limitations.ru.md) / [EN](docs/limitations.md)
+- [Дорожная карта](docs/roadmap.ru.md) / [EN](docs/roadmap.md)
+- [Скриншоты](docs/screenshots/README.ru.md) / [EN](docs/screenshots/README.md)
 
 ## Лицензия
 

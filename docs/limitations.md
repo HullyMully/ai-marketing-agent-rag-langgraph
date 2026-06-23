@@ -1,5 +1,7 @@
 # Limitations
 
+🇺🇸English | [🇷🇺Русский](./limitations.ru.md)
+
 This project is a **portfolio MVP / prototype**, intentionally scoped to be clear
 and runnable rather than production-grade. Known limitations:
 
