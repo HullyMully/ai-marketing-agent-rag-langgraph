@@ -16,9 +16,26 @@ support tickets and human escalation.
 
 ---
 
-## Product demo
+## Demo screenshots
 
-soon...
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/landing-page.png" alt="Landing page" width="100%"></td>
+    <td width="50%"><img src="docs/screenshots/web-chat-lead-flow.png" alt="Lead creation flow" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Landing page</em></td>
+    <td align="center"><em>Lead creation flow</em></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/api-overview.png" alt="API overview" width="100%"></td>
+    <td width="50%"><img src="docs/screenshots/metrics-dashboard.png" alt="Metrics dashboard" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>API overview</em></td>
+    <td align="center"><em>Metrics dashboard</em></td>
+  </tr>
+</table>
 
 Run the API with `uvicorn app.main:app --reload`, then open the local web demo in
 a browser:

@@ -12,13 +12,12 @@ Diagrams (`docs/assets/`):
 - `langgraph-flow.svg` – agent state flow
 - `rag-pipeline.svg` – RAG pipeline
 
-Demo views (`docs/screenshots/`):
+Demo screenshots (`docs/screenshots/`):
 
-- `demo-chat.svg` – conversational flow
-- `crm-lead-created.svg` – lead creation in the CRM view
-- `escalation-ticket.svg` – escalation ticket
-- `demo-metrics.svg` – demo metrics
-- `api-overview.svg` – API endpoints overview
+- `landing-page.png` – landing page
+- `web-chat-lead-flow.png` – lead creation flow in the chat demo
+- `api-overview.png` – API overview page
+- `metrics-dashboard.png` – metrics dashboard
 
 ## Notes
 

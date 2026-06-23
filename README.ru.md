@@ -11,9 +11,26 @@
 
 ---
 
-## Обзор демо
+## Скриншоты демо
 
-soon...
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/landing-page.png" alt="Лендинг" width="100%"></td>
+    <td width="50%"><img src="docs/screenshots/web-chat-lead-flow.png" alt="Создание лида" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Лендинг</em></td>
+    <td align="center"><em>Создание лида</em></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/api-overview.png" alt="Обзор API" width="100%"></td>
+    <td width="50%"><img src="docs/screenshots/metrics-dashboard.png" alt="Дашборд метрик" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Обзор API</em></td>
+    <td align="center"><em>Дашборд метрик</em></td>
+  </tr>
+</table>
 
 Запустите API командой `uvicorn app.main:app --reload` и откройте локальное
 веб-демо в браузере:
