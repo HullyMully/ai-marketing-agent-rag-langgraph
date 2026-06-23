@@ -51,8 +51,8 @@ and which embedding mode was used.
 ## Knowledge base files
 
 `services.md`, `pricing.md`, `onboarding.md`, `campaign_workflow.md`, `faq.md`,
-`escalation_policy.md`, `crm_policy.md` – all synthetic content for the fictional
-NovaGrowth Agency.
+`escalation_policy.md`, `crm_policy.md` – all fictional sample content for a digital
+marketing studio. Replace these files with your own company documents and re-ingest.
 
 ## Notes on demo mode
 

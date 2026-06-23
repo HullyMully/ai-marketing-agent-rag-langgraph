@@ -1,15 +1,15 @@
-# Portfolio case study – NovaGrowth AI Marketing Agent
+# Example case study – AI Customer Assistant
 
 🇺🇸English | [🇷🇺Русский](./portfolio-case-study.ru.md)
 
-> **This is a fictional business case and a portfolio prototype.** "NovaGrowth
-> Agency" is not a real company, and this work was **not** done for any real
-> client. It is a *realistic demo scenario* **inspired by common marketing agency
-> workflows**. All data is synthetic.
+> **This is a worked example using the shipped fictional sample company.**
+> "Acme Growth Studio" is not a real company; it is the sample profile bundled with
+> the platform to show how a small business would configure and use the assistant.
+> All data is fictional and uses `.example` domains.
 
 ## The (fictional) problem
 
-NovaGrowth Agency – a small, fictional digital marketing agency – receives many
+Acme Growth Studio – a small, fictional digital marketing agency – receives many
 repetitive messages from potential clients and internal team members: questions
 about services, pricing and campaign workflow, plus genuine new leads and the
 occasional complaint that needs a human. Handling these manually is slow and

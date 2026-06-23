@@ -49,7 +49,7 @@ ReDoc: **http://localhost:8000/redoc**
 документов и чанков, а также режим эмбеддингов.
 
 ### `GET /metrics/demo`
-Сводные демо-метрики:
+Сводные метрики рабочего пространства (по базе данных этого экземпляра):
 ```json
 { "conversations": 3, "leads": 4, "tickets": 2, "escalation_rate": 0.33, "resolved_by_ai_rate": 0.67 }
 ```

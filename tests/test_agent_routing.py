@@ -65,8 +65,22 @@ def test_full_flow_creates_one_lead_no_duplicate(client: TestClient) -> None:
     assert matching[0]["company"] == "BrightDesk"
 
 
+def test_terse_flow_creates_lead_after_final_field(client: TestClient) -> None:
+    # Mirrors the documented example flow with terse, natural replies; the lead
+    # must appear only after the final (name + email) message.
+    sid = _sid("terse")
+    _chat(client, sid, "Hello, I need help with marketing")
+    _chat(client, sid, "Paid ads for my SaaS")
+    partial = _chat(client, sid, "BrightDesk, around $5k/month")
+    assert partial["lead_draft"].get("company") == "BrightDesk"
+    assert partial["lead_created"] is False
+    created = _chat(client, sid, "Sam, sam@brightdesk.example")
+    assert created["lead_created"] is True
+    assert created["lead_id"] is not None
+
+
 def test_service_question_uses_knowledge_source(client: TestClient) -> None:
-    data = _chat(client, _sid("svc"), "What services does NovaGrowth provide?")
+    data = _chat(client, _sid("svc"), "What services do you provide?")
     assert data["intent"] == "service_question"
     assert data["sources"]
 

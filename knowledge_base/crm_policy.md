@@ -1,32 +1,19 @@
-# NovaGrowth Agency – CRM & Lead Qualification Policy
+# Lead qualification policy
 
-> Internal synthetic policy for a fictional agency.
+> Sample internal policy. Replace with your own and re-ingest.
 
-## Lead Qualification Criteria
-A contact becomes a qualified lead when we can capture:
-- **Name** of the person
-- **Contact** (email or phone)
-- **Service interest** (what they want help with)
-- Ideally a **company** name and a rough **budget range**
+## Required fields to create a lead
+A lead is created once these are known: **name, company, contact email, service
+interest and budget** (budget may be marked unknown if the user asks to proceed).
+The assistant asks short follow-up questions for any missing fields.
 
-If budget is unknown, still create the lead and mark budget as "unspecified".
+## Lead statuses
+- **new** — just captured by the assistant.
+- **contacted** — a human has reached out.
+- **qualified** — fits our ideal customer profile and budget.
+- **disqualified** — out of scope.
 
-## Required Fields to Create a Lead
-At minimum: **name** and **contact**. The assistant should ask short follow-up
-questions to collect any missing required fields before creating the lead.
-
-## Lead Statuses
-- **new**: just captured by the assistant.
-- **contacted**: a human has reached out.
-- **qualified**: fits our ICP and budget.
-- **disqualified**: out of scope (e.g., enterprise-only need).
-
-## Data Handling
+## Data handling
 - Only store business contact details the user voluntarily provides.
-- Never store passwords, full payment-card numbers, or other sensitive data.
-- All demo data in this project is synthetic.
-
-## Budget Guidance
-- Under $1,500/month: suggest the Starter package or a one-time project.
-- $1,500–$5,000/month: Growth package.
-- Above $5,000/month: Scale or a custom retainer.
+- Never store passwords, full payment-card numbers or other sensitive data.
+- Sample data in this project is fictional and uses .example domains.

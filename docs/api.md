@@ -49,7 +49,7 @@ List tickets / fetch one (404 if missing).
 chunk counts and the embedding mode.
 
 ### `GET /metrics/demo`
-Aggregate demo metrics:
+Aggregate workspace metrics (computed from this instance's database):
 ```json
 { "conversations": 3, "leads": 4, "tickets": 2, "escalation_rate": 0.33, "resolved_by_ai_rate": 0.67 }
 ```

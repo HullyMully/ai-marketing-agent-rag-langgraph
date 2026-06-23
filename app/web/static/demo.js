@@ -1,19 +1,22 @@
-/* NovaGrowth AI Assistant — web demo client.
+/* AI Customer Assistant — web chat client.
    Plain JS, no dependencies. Every reply comes from the real agent via
-   POST /chat. Quick actions only send a realistic first user message; the
-   right panel renders the actual session state returned by the backend. */
+   POST /chat. Suggested prompts only send a normal user message; the right
+   panel renders the actual conversation state returned by the backend. */
 (function () {
   "use strict";
 
-  var SESSION_KEY = "novagrowth_demo_session_id";
+  var SESSION_KEY = "assistant_demo_session_id";
 
-  // Quick actions send a single, realistic opening message to the real agent.
-  var QUICK_MESSAGES = {
-    services: "What services does NovaGrowth provide?",
-    pricing: "What pricing packages are available?",
-    lead: "Hi, we need help launching paid ads for our SaaS product.",
-    human: "I need a human manager for a custom enterprise marketing workflow.",
-    memory: "What company and budget have I mentioned so far?"
+  var INTENT_LABEL = {
+    greeting: "Greeting",
+    service_question: "Service question",
+    pricing_question: "Pricing question",
+    lead_qualification: "Lead qualification",
+    create_lead: "Lead details provided",
+    support_request: "Support request",
+    human_escalation: "Human escalation",
+    memory_question: "Memory question",
+    unknown: "Unclear"
   };
 
   var FIELD_LABELS = {
@@ -29,7 +32,7 @@
     created_lead: "Lead created",
     lead_already_exists: "Lead already created",
     answered_from_kb: "Answered from knowledge base",
-    escalated_to_human: "Escalated to a manager",
+    escalated_to_human: "Escalated to a human",
     answered_with_memory: "Used session memory",
     asked_clarification: "Asked for clarification"
   };
@@ -60,15 +63,32 @@
     tPriority: document.getElementById("t-priority"),
     tStatus: document.getElementById("t-status"),
     sources: document.getElementById("r-sources"),
-    workflow: document.getElementById("r-workflow")
+    workflow: document.getElementById("r-workflow"),
+    intent: document.getElementById("r-intent")
   };
 
   var lastRole = null;
   var busy = false;
+  var assistantName = "AI Assistant";
+
+  /* ---------- config ---------- */
+  function loadConfig() {
+    fetch("/config").then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (c) {
+        if (!c) { return; }
+        assistantName = c.assistant_name || assistantName;
+        var brand = document.getElementById("brand-name");
+        if (brand && c.brand_label) { brand.textContent = c.brand_label; }
+        var an = document.getElementById("assistant-name");
+        if (an) { an.textContent = assistantName; }
+        var ava = document.getElementById("ava-initial");
+        if (ava) { ava.textContent = (assistantName.charAt(0) || "A").toUpperCase(); }
+      }).catch(function () {});
+  }
 
   /* ---------- session ---------- */
   function newSessionId() {
-    return "web-demo-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+    return "web-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
   }
   function getSessionId() {
     var id = localStorage.getItem(SESSION_KEY);
@@ -88,7 +108,7 @@
     if (role === "assistant" && groupStart) {
       var lbl = document.createElement("div");
       lbl.className = "msg-label";
-      lbl.textContent = "NovaGrowth AI";
+      lbl.textContent = assistantName;
       wrap.appendChild(lbl);
     }
     var bubble = document.createElement("div");
@@ -105,7 +125,11 @@
     hideEmptyChat();
     var wrap = document.createElement("div");
     wrap.className = "msg assistant group-start typing";
-    wrap.innerHTML = '<div class="msg-label">NovaGrowth AI</div><div class="bubble">typing…</div>';
+    var lbl = document.createElement("div");
+    lbl.className = "msg-label"; lbl.textContent = assistantName;
+    var bubble = document.createElement("div");
+    bubble.className = "bubble"; bubble.textContent = "typing…";
+    wrap.appendChild(lbl); wrap.appendChild(bubble);
     chat.appendChild(wrap);
     lastRole = "assistant";
     scrollToBottom();
@@ -147,7 +171,6 @@
     var draft = data.lead_draft || {};
     var hasDraft = Object.keys(draft).length > 0;
 
-    // Lead: created vs in-progress draft.
     if (data.lead_created) {
       setText(els.lCompany, draft.company);
       setText(els.lContact, draft.contact_email);
@@ -163,7 +186,6 @@
       els.rcDraft.classList.add("hidden");
     }
 
-    // Ticket (only on a real escalation).
     if (data.ticket_created && data.ticket_id) {
       getJSON("/tickets/" + data.ticket_id).then(function (t) {
         if (!t) { return; }
@@ -177,7 +199,6 @@
       els.rcTicket.classList.add("hidden");
     }
 
-    // Knowledge sources.
     if (data.sources && data.sources.length) {
       setText(els.sources, data.sources.join(", "));
       els.rcSources.classList.remove("hidden");
@@ -185,10 +206,10 @@
       els.rcSources.classList.add("hidden");
     }
 
-    // Memory.
     els.rcMemory.classList.toggle("hidden", !data.memory_used);
 
     setText(els.workflow, ACTION_LABEL[data.action] || "Replied");
+    setText(els.intent, INTENT_LABEL[data.intent] || data.intent);
   }
 
   /* ---------- send ---------- */
@@ -241,15 +262,14 @@
 
   document.querySelectorAll(".qa").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      var msg = QUICK_MESSAGES[btn.getAttribute("data-scenario")];
+      var msg = btn.getAttribute("data-prompt");
       if (!msg) { return; }
-      document.querySelectorAll(".qa").forEach(function (b) { b.classList.remove("active"); });
-      btn.classList.add("active");
       send(msg);
     });
   });
 
   if (newChatBtn) { newChatBtn.addEventListener("click", newConversation); }
 
+  loadConfig();
   getSessionId();
 })();

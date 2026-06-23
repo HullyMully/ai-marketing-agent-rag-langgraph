@@ -19,7 +19,6 @@ env/
 *.db
 *.sqlite
 *.sqlite3
-novagrowth.db
 
 # Local data
 local_data/
@@ -38,3 +37,6 @@ htmlcov/
 .idea/
 .vscode/
 .DS_Store
+
+# Local company profile (real deployments) — never commit
+config/company.local.json

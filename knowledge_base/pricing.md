@@ -1,41 +1,33 @@
-# NovaGrowth Agency – Pricing Packages
+# Pricing
 
-> Synthetic pricing for a fictional agency. Numbers are illustrative only.
+> Sample knowledge base. Replace this file with your own pricing and run the
+> ingestion script. Numbers below are illustrative only.
 
-We keep pricing transparent with three standard packages plus custom retainers. All prices are in USD per month unless noted.
+We keep pricing simple with three monthly packages plus custom retainers. Prices
+are in USD per month and exclude ad spend, which platforms bill directly.
 
-## Starter – $1,500 / month
-Best for solo founders and very small businesses testing one channel.
-- One paid channel (Google **or** Meta) OR basic SEO
+## Starter — $1,500 / month
+Best for testing one channel.
+- One paid channel **or** basic SEO
 - Up to $5,000/month ad spend managed
 - Monthly performance report
-- Email support, 48h response
 
-## Growth – $3,500 / month
+## Growth — $3,500 / month
 Our most popular package for businesses ready to scale.
-- Up to two channels (e.g., Google + Meta)
+- Up to two channels
 - Up to $20,000/month ad spend managed
-- Content: 2 articles/month + landing-page support
-- Bi-weekly strategy calls
-- Priority support, 24h response
+- Bi-weekly strategy calls and priority support
 
-## Scale – $7,000 / month
+## Scale — $7,000 / month
 For established brands with multi-channel needs.
 - Up to four channels
-- Up to $75,000/month ad spend managed
-- Full content + email lifecycle program
-- Weekly calls and a dedicated account manager
-- CRO experimentation included
+- Dedicated account manager and weekly calls
+- Conversion-rate experimentation included
 
-## Custom / Enterprise-lite
-For unusual scopes we build a custom retainer. Custom engagements start around $10,000/month and are scoped after a discovery call.
+## Custom
+For unusual scopes we build a custom retainer, typically starting around
+$10,000/month, scoped after a discovery call.
 
-## One-Time Projects
-- SEO Technical Audit: from $1,200
-- Campaign Launch (single channel): from $900
-- Analytics & GA4 Setup: from $750
-
-## Billing Notes
+## Billing notes
 - Month-to-month after an initial 3-month commitment.
-- Ad spend is billed by the platforms directly and is **not** included in management fees.
-- A discovery call is required before any custom quote.
+- Ad spend is billed by the platforms directly and is **not** included.

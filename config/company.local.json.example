@@ -1,0 +1,10 @@
+{
+  "_comment": "Copy this file to config/company.local.json and edit it for your business. company.local.json is git-ignored and overrides company.example.json. Environment variables override both. Do NOT put API keys here — those belong in .env.",
+  "company_name": "Your Company",
+  "company_domain": "your-domain.example",
+  "company_description": "What your company does, in one sentence",
+  "company_contact_email": "support@your-domain.example",
+  "assistant_name": "AI Assistant",
+  "escalation_target": "human manager",
+  "business_industry": "your industry"
+}

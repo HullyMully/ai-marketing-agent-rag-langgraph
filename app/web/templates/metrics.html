@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NovaGrowth AI Assistant — Metrics</title>
-  <link rel="stylesheet" href="/static/styles.css?v=4">
+  <title>AI Customer Assistant — Metrics</title>
+  <link rel="stylesheet" href="/static/styles.css?v=5">
 </head>
 <body>
   <header class="app-header">
     <a class="brand" href="/">
       <span class="logo-dot" aria-hidden="true"></span>
-      <span class="brand-name">NovaGrowth AI Assistant</span>
+      <span class="brand-name" id="brand-name">AI Customer Assistant</span>
     </a>
     <nav class="app-nav">
-      <a href="/demo">Demo</a>
+      <a href="/demo">Assistant</a>
       <a href="/api-overview">API Overview</a>
       <a href="/metrics" class="active">Metrics</a>
       <a href="/docs">Swagger</a>
@@ -22,31 +22,35 @@
 
   <main class="container">
     <section class="hero" style="padding-bottom:6px">
-      <h1 style="font-size:32px">Demo metrics</h1>
-      <p class="sub">Live counters from <code>/metrics/demo</code>, computed from the demo database.</p>
+      <h1 style="font-size:32px">Metrics</h1>
+      <p class="sub">Local workspace metrics, computed from this instance's database
+        (<code>/metrics/demo</code>).</p>
     </section>
 
     <section class="metric-grid">
       <article class="card metric-card"><div class="mk">Conversations</div><div id="m-convos" class="mv">—</div></article>
-      <article class="card metric-card"><div class="mk">Leads</div><div id="m-leads" class="mv green">—</div></article>
-      <article class="card metric-card"><div class="mk">Tickets</div><div id="m-tickets" class="mv amber">—</div></article>
-      <article class="card metric-card"><div class="mk">Resolved by AI</div><div id="m-resolved" class="mv teal">—</div></article>
+      <article class="card metric-card"><div class="mk">Leads created</div><div id="m-leads" class="mv green">—</div></article>
+      <article class="card metric-card"><div class="mk">Tickets created</div><div id="m-tickets" class="mv amber">—</div></article>
+      <article class="card metric-card"><div class="mk">AI-resolved conversations</div><div id="m-resolved" class="mv teal">—</div></article>
       <article class="card metric-card"><div class="mk">Escalation rate</div><div id="m-escrate" class="mv">—</div></article>
-      <article class="card metric-card"><div class="mk">Avg response time</div><div id="m-rt" class="mv">—</div><div class="mnote">offline mock mode</div></article>
+      <article class="card metric-card"><div class="mk">Avg response time</div><div id="m-rt" class="mv">—</div><div class="mnote">local instance</div></article>
     </section>
 
-    <p class="metrics-note">Synthetic demo data. Run a few conversations in the
-      <a href="/demo" style="color:var(--teal);text-decoration:none">demo</a> to see the numbers change.</p>
+    <p class="metrics-note">Local workspace metrics. Numbers reflect conversations
+      run on this instance.</p>
   </main>
 
   <footer class="page-foot">
-    Portfolio case study. NovaGrowth is fictional. Demo data is fictional.
+    Configurable AI assistant platform. Sample data is fictional and uses .example domains.
   </footer>
 
   <script>
     (function () {
-      function pct(x) { return Math.round((x || 0) * 100) + "%"; }
-      fetch("/metrics/demo").then(function (r) { return r.ok ? r.json() : null; })
+      function pct(x){ return Math.round((x||0)*100)+"%"; }
+      fetch("/config").then(function(r){return r.ok?r.json():null;})
+        .then(function(c){ if(c&&c.brand_label){document.getElementById("brand-name").textContent=c.brand_label;} })
+        .catch(function(){});
+      fetch("/metrics/demo").then(function (r){return r.ok?r.json():null;})
         .then(function (m) {
           if (!m) { return; }
           document.getElementById("m-convos").textContent = m.conversations;
@@ -55,8 +59,7 @@
           document.getElementById("m-resolved").textContent = pct(m.resolved_by_ai_rate);
           document.getElementById("m-escrate").textContent = pct(m.escalation_rate);
           document.getElementById("m-rt").textContent = "~1.2s";
-        })
-        .catch(function () {});
+        }).catch(function(){});
     })();
   </script>
 </body>

@@ -1,0 +1,9 @@
+{
+  "company_name": "Acme Growth Studio",
+  "company_domain": "acme.example",
+  "company_description": "Digital marketing and customer acquisition agency",
+  "company_contact_email": "hello@acme.example",
+  "assistant_name": "AI Assistant",
+  "escalation_target": "human manager",
+  "business_industry": "digital marketing"
+}

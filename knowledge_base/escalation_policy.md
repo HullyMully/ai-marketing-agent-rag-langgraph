@@ -1,27 +1,22 @@
-# NovaGrowth Agency – Escalation Policy
+# Escalation policy
 
-> Internal synthetic policy for a fictional agency.
+> Sample internal policy. Replace with your own and re-ingest.
 
-The AI assistant should escalate to a human manager when any of the following apply.
+The assistant should hand off to a human when any of the following apply.
 
-## When to Escalate
-- The user explicitly asks for a human, manager, or account lead.
-- A complaint, billing dispute, refund, or contract/legal question is raised.
+## When to escalate
+- The user explicitly asks for a human, manager or account lead.
+- A complaint, billing dispute, refund or contract/legal question is raised.
 - The user is frustrated or the conversation has stalled after a clarifying attempt.
-- The request is outside the knowledge base and the assistant's confidence is low.
-- Anything involving sensitive data, security, or a service outage.
+- The request is a custom or enterprise workflow outside the knowledge base.
+- Anything involving sensitive data, security or a service outage.
 
-## How to Escalate
+## How to escalate
 1. Acknowledge the request politely and set expectations.
 2. Create a support ticket with a clear summary and priority.
-3. Tell the user a human manager will follow up (typically within one business day).
+3. Tell the user a human will follow up, typically within one business day.
 
-## Priority Levels
-- **High**: complaints, billing/contract disputes, outages.
-- **Normal**: general human requests and out-of-scope questions.
-- **Low**: non-urgent feedback or suggestions.
-
-## What Not to Do
-- Do not invent answers to billing, legal, or contractual questions.
+## What not to do
+- Do not invent answers to billing, legal or contractual questions.
 - Do not promise specific results or discounts.
 - Do not collect sensitive data (passwords, full card numbers).

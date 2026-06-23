@@ -1,11 +1,15 @@
-# NovaGrowth AI Marketing Agent 
+# AI Customer Assistant
 
-Разговорный ИИ-агент для **вымышленного** агентства цифрового маркетинга – на
+**Настраиваемый ИИ-ассистент для клиентов** для небольших компаний – на
 **LangGraph**, **RAG (Qdrant)**, **FastAPI**, с **Telegram-ботом**, **мок-CRM**,
-тикетами поддержки и эскалацией на человека.
+тикетами поддержки и эскалацией на человека. Настройте профиль бизнеса, загрузите
+свою базу знаний, подключите LLM-провайдера и запускайте ассистента локально или
+за собственным API.
 
-> **Портфолио-кейс для вымышленного digital-агентства. Все данные в демо являются тестовыми.**
-> NovaGrowth Agency – не реальная компания, проект не связан ни с каким реальным бизнесом.
+> **В комплекте идёт вымышленная демонстрационная конфигурация** (digital-студия,
+> только домены `.example`), поэтому проект работает «из коробки». Замените образцовый
+> профиль компании и базу знаний на свои — см.
+> [docs/company-configuration.ru.md](docs/company-configuration.ru.md).
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688)](https://fastapi.tiangolo.com/)
@@ -253,12 +257,14 @@ curl http://localhost:8000/metrics/demo
 | GET | `/tickets` | Список тикетов |
 | GET | `/tickets/{id}` | Получить тикет |
 | POST | `/knowledge/ingest` | Переиндексировать базу знаний |
-| GET | `/metrics/demo` | Демо-метрики |
+| GET | `/metrics/demo` | Метрики рабочего пространства |
 
-## Демо-сценарии
+## Примеры диалогов
 
-См. [docs/demo-scenarios.md](docs/demo-scenarios.md) – пять готовых диалогов
-(услуги, цены, превращение в лида, эскалация, память).
+См. [docs/demo/demo-walkthrough.ru.md](docs/demo/demo-walkthrough.ru.md) – готовые
+диалоги (услуги, цены, превращение в лида, эскалация, память). Чтобы прогнать полный
+сценарий лида против запущенного сервера, используйте
+`python scripts/test_production_flow.py`.
 
 ## Скриншоты
 
@@ -268,7 +274,7 @@ curl http://localhost:8000/metrics/demo
 
 ## Ограничения
 
-Это MVP для портфолио. См. [docs/limitations.md](docs/limitations.md): мок-LLM и
+См. [docs/limitations.md](docs/limitations.md): мок-LLM и
 мок-эмбеддинги – детерминированные заглушки (не семантически сильные), нет
 аутентификации, «CRM» – это локальная таблица SQLite, моделирующая паттерн
 интеграции, а не реальный SaaS.
@@ -280,6 +286,7 @@ curl http://localhost:8000/metrics/demo
 
 ## Документация
 
+- [Настройка компании](docs/company-configuration.ru.md) / [EN](docs/company-configuration.md)
 - [Архитектура](docs/architecture.ru.md) / [EN](docs/architecture.md)
 - [API](docs/api.ru.md) / [EN](docs/api.md)
 - [RAG](docs/rag.ru.md) / [EN](docs/rag.md)

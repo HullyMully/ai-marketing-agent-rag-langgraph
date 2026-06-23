@@ -30,14 +30,14 @@ class Settings(BaseSettings):
 
     # --- Vector store ---
     qdrant_url: str = "http://localhost:6333"
-    qdrant_collection: str = "novagrowth_kb"
+    qdrant_collection: str = "assistant_kb"
     use_mock_embeddings: bool = True
     embedding_dim: int = 384
 
     # --- App ---
     app_host: str = "0.0.0.0"
     app_port: int = 8000
-    database_url: str = "sqlite:///./novagrowth.db"
+    database_url: str = "sqlite:///./assistant.db"
     knowledge_base_dir: str = "knowledge_base"
     log_level: str = "INFO"
     escalation_confidence_threshold: float = 0.45

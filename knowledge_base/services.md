@@ -1,33 +1,31 @@
-# NovaGrowth Agency – Services
+# Services
 
-> Synthetic knowledge base content for a fictional marketing agency. For portfolio/demo use only.
+> Sample knowledge base. Replace this file with your own company's documents and
+> run `python scripts/ingest_knowledge.py`. All sample data is fictional.
 
-NovaGrowth Agency is a full-service digital marketing studio for small and mid-sized businesses. We help brands grow predictable, measurable revenue through paid media, content, and lifecycle marketing.
+We are a digital marketing studio that helps small and mid-sized businesses grow
+through measurable, channel-focused work.
 
-## Core Services
+## What we offer
 
-### Paid Advertising (PPC)
-We plan, launch, and optimize paid campaigns across Google Ads, Meta (Facebook & Instagram), TikTok, and LinkedIn. Work includes audience research, creative testing, conversion tracking setup, and weekly optimization. Typical clients: e-commerce stores and B2B SaaS looking for fast, trackable lead generation.
+- **Paid acquisition (PPC)** — Google Ads, Meta, TikTok and LinkedIn campaigns:
+  audience research, creative testing, conversion tracking and weekly optimization.
+- **SEO** — technical audits, on-page optimization, keyword strategy and content
+  briefs aimed at compounding organic traffic over 3–6 months.
+- **Landing page audits** — conversion-focused reviews of your key pages with a
+  prioritized list of fixes.
+- **Analytics setup** — GA4 and server-side tracking, dashboards and event design
+  so you can trust your numbers.
+- **Campaign optimization** — ongoing management of live campaigns against your
+  target cost per acquisition and return on ad spend.
 
-### Search Engine Optimization (SEO)
-Technical audits, on-page optimization, keyword strategy, and content briefs. We focus on organic traffic that compounds over 3–6 months. Includes monthly reporting on rankings, traffic, and assisted conversions.
+## Who we work with
 
-### Content Marketing
-Editorial strategy, blog production, and repurposing into social and email. We run a managed content calendar with SEO-aligned topics. Deliverables include long-form articles, landing-page copy, and content distribution.
+Small businesses, local service providers, e-commerce brands and early-stage B2B
+companies. We do not take on enterprise accounts that need a dedicated 24/7 team.
 
-### Social Media Management
-Organic social strategy, content scheduling, community management, and monthly performance reviews across the platforms most relevant to your audience.
+## Engagement models
 
-### Email & Lifecycle Marketing
-Newsletter programs, automated welcome and abandoned-cart flows, segmentation, and A/B testing. Built in tools like Klaviyo or Mailchimp.
-
-### Analytics & Conversion Rate Optimization (CRO)
-Analytics setup (GA4, server-side tracking), dashboards, and structured experimentation to improve landing-page and funnel conversion rates.
-
-## Who We Work With
-We specialize in small businesses, local service providers, e-commerce brands, and early-stage B2B companies. We typically do not take on enterprise accounts requiring 24/7 dedicated teams.
-
-## Engagement Models
-- **Project**: a fixed-scope deliverable (e.g., an SEO audit or a campaign launch).
-- **Retainer**: an ongoing monthly partnership across one or more services.
-- **Advisory**: a lighter strategy-and-review engagement for in-house teams.
+- **Project** — a fixed-scope deliverable (for example an SEO audit).
+- **Retainer** — an ongoing monthly partnership across one or more services.
+- **Advisory** — a lighter strategy-and-review engagement for in-house teams.

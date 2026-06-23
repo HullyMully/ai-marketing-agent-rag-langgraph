@@ -1,6 +1,6 @@
 """The stateful conversational agent, implemented with LangGraph.
 
-The agent behaves like a real sales/support assistant for NovaGrowth:
+The agent behaves like a real sales/support assistant for the configured company:
 
 * Service / pricing / support questions are answered from the knowledge base (RAG).
 * Prospects are qualified across several turns into a session **lead draft**
@@ -16,7 +16,8 @@ from langgraph.graph import END, StateGraph
 
 from app.agent.llm import get_llm
 from app.agent.memory import REQUIRED_FIELDS, extract_fields, get_memory
-from app.agent.prompts import RAG_ANSWER_PROMPT, SYSTEM_PERSONA
+from app.agent.prompts import RAG_ANSWER_PROMPT, get_system_persona
+from app.company import get_company
 from app.agent.state import AgentState
 from app.rag.retriever import get_retriever
 from app.tools.crm_tools import create_lead
@@ -110,8 +111,8 @@ def collect_missing_info_node(state: AgentState) -> AgentState:
 
     if "service_interest" in missing:
         answer = (
-            "Welcome! What kind of marketing help are you looking for — paid ads, "
-            "a landing page audit, analytics setup, or campaign optimization?"
+            "Welcome! What kind of help are you looking for — for example paid ads, "
+            "SEO, analytics setup, or a landing page audit?"
         )
     elif "company" in missing or "budget_range" in missing:
         needs = []
@@ -217,9 +218,10 @@ def escalate_to_human_node(state: AgentState) -> AgentState:
     state["escalated"] = True
     state["ticket_created"] = True
     state["action_taken"] = "escalated_to_human"
+    target = get_company().escalation_target
     state["answer"] = (
-        "I've passed this to a human manager at NovaGrowth "
-        f"(ticket #{ticket['id']}). They'll follow up within one business day."
+        f"I've passed this to a {target} (ticket #{ticket['id']}). "
+        "They'll follow up within one business day."
     )
     return state
 
@@ -228,7 +230,7 @@ def generate_answer_node(state: AgentState) -> AgentState:
     """Generate a grounded answer from retrieved knowledge (RAG path)."""
     context = "\n\n".join(state.get("retrieved", [])) or "(no context found)"
     prompt = RAG_ANSWER_PROMPT.format(
-        persona=SYSTEM_PERSONA,
+        persona=get_system_persona(),
         history=_history_text(state.get("history", [])),
         context=context,
         question=state["user_message"],

@@ -43,6 +43,10 @@ _COMPANY_RE = re.compile(
     r"here at|we are|we're|from)\s+"
     r"([A-Z][A-Za-z0-9&]+(?:\s+[A-Z][A-Za-z0-9&]+){0,3})"
 )
+# Bare company name when the user answers a "company + budget" prompt tersely,
+# e.g. "BrightDesk, around $5k/month". Anchored to a leading capitalised token
+# immediately followed by a comma to avoid false positives.
+_BARE_COMPANY_RE = re.compile(r"^\s*([A-Z][A-Za-z0-9&]{1,30}),")
 _BUDGET_RE = re.compile(
     r"\$\s?[\d,]+\s?[km]?(?:\s?/?\s?(?:per month|a month|months|month|mo))?",
     re.IGNORECASE,
@@ -156,16 +160,21 @@ def extract_fields(message: str) -> dict:
         if bare and bare.group(1).lower() not in _NOT_NAMES:
             found["name"] = bare.group(1)
 
-    company = _COMPANY_RE.search(message)
-    if company:
-        found["company"] = company.group(1).strip().rstrip(".")
-
     if _BUDGET_UNKNOWN_RE.search(message):
         found["budget_unknown"] = True
     else:
         budget = _BUDGET_RE.search(message)
         if budget:
             found["budget_range"] = budget.group(0).strip()
+
+    company = _COMPANY_RE.search(message)
+    if company:
+        found["company"] = company.group(1).strip().rstrip(".")
+    elif not email and (found.get("budget_range") or found.get("budget_unknown")):
+        # Terse reply to a company+budget prompt, e.g. "BrightDesk, around $5k/month".
+        bare_company = _BARE_COMPANY_RE.match(message)
+        if bare_company and bare_company.group(1).lower() not in _NOT_NAMES:
+            found["company"] = bare_company.group(1)
 
     lowered = message.lower()
     for service, keywords in _SERVICE_KEYWORDS.items():

@@ -51,8 +51,8 @@ curl -X POST http://localhost:8000/knowledge/ingest
 ## Файлы базы знаний
 
 `services.md`, `pricing.md`, `onboarding.md`, `campaign_workflow.md`, `faq.md`,
-`escalation_policy.md`, `crm_policy.md` — всё синтетическое содержимое для
-вымышленного агентства NovaGrowth.
+`escalation_policy.md`, `crm_policy.md` — всё это вымышленное образцовое содержимое
+для digital-студии. Замените эти файлы своими документами и переиндексируйте базу.
 
 ## Замечания о демо-режиме
 

@@ -13,7 +13,7 @@ import pytest
 # Force fully-offline demo mode BEFORE app modules import settings.
 os.environ.setdefault("MOCK_LLM", "true")
 os.environ.setdefault("USE_MOCK_EMBEDDINGS", "true")
-_tmp_db = os.path.join(tempfile.gettempdir(), "novagrowth_test.db")
+_tmp_db = os.path.join(tempfile.gettempdir(), "assistant_test.db")
 os.environ["DATABASE_URL"] = f"sqlite:///{_tmp_db}"
 
 from fastapi.testclient import TestClient  # noqa: E402

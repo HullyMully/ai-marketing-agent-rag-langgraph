@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NovaGrowth AI Assistant — API Overview</title>
-  <link rel="stylesheet" href="/static/styles.css?v=4">
+  <title>AI Customer Assistant — API Overview</title>
+  <link rel="stylesheet" href="/static/styles.css?v=5">
 </head>
 <body>
   <header class="app-header">
     <a class="brand" href="/">
       <span class="logo-dot" aria-hidden="true"></span>
-      <span class="brand-name">NovaGrowth AI Assistant</span>
+      <span class="brand-name" id="brand-name">AI Customer Assistant</span>
     </a>
     <nav class="app-nav">
-      <a href="/demo">Demo</a>
+      <a href="/demo">Assistant</a>
       <a href="/api-overview" class="active">API Overview</a>
       <a href="/metrics">Metrics</a>
       <a href="/docs">Swagger</a>
@@ -30,7 +30,7 @@
     <section class="api-grid">
       <article class="card endpoint">
         <span class="method post">POST</span>
-        <div class="ep-main"><div class="path">/chat</div><div class="desc">Send a user message to the agent</div></div>
+        <div class="ep-main"><div class="path">/chat</div><div class="desc">Send a user message to the assistant</div></div>
         <span class="tag">Chat</span>
       </article>
       <article class="card endpoint">
@@ -45,7 +45,7 @@
       </article>
       <article class="card endpoint">
         <span class="method post">POST</span>
-        <div class="ep-main"><div class="path">/tickets</div><div class="desc">Create an escalation ticket</div></div>
+        <div class="ep-main"><div class="path">/tickets</div><div class="desc">Create a support / escalation ticket</div></div>
         <span class="tag">Tickets</span>
       </article>
       <article class="card endpoint">
@@ -60,7 +60,7 @@
       </article>
       <article class="card endpoint">
         <span class="method get">GET</span>
-        <div class="ep-main"><div class="path">/metrics/demo</div><div class="desc">View demo metrics</div></div>
+        <div class="ep-main"><div class="path">/metrics/demo</div><div class="desc">Workspace metrics (JSON)</div></div>
         <span class="tag">Metrics</span>
       </article>
       <article class="card endpoint">
@@ -72,7 +72,12 @@
   </main>
 
   <footer class="page-foot">
-    Portfolio case study. NovaGrowth is fictional. Demo data is fictional.
+    Configurable AI assistant platform. Sample data is fictional and uses .example domains.
   </footer>
+  <script>
+    fetch("/config").then(function (r){return r.ok?r.json():null;})
+      .then(function (c){ if(c&&c.brand_label){document.getElementById("brand-name").textContent=c.brand_label;} })
+      .catch(function(){});
+  </script>
 </body>
 </html>

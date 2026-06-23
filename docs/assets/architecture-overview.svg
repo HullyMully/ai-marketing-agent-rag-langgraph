@@ -16,7 +16,7 @@
   <rect width="1160" height="820" fill="url(#bg2)"/>
 
   <text x="60" y="56" fill="#f1f5f9" font-size="30" font-weight="700">Architecture Overview</text>
-  <text x="60" y="84" fill="#8aa0c6" font-size="15" letter-spacing="2">NovaGrowth AI Marketing Agent – portfolio case study · fictional agency</text>
+  <text x="60" y="84" fill="#8aa0c6" font-size="15" letter-spacing="2">AI Customer Assistant · configurable platform · fictional sample data</text>
 
   <!-- links -->
   <g class="lk" marker-end="url(#a2)">

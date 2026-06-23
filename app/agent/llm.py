@@ -65,7 +65,7 @@ def _mock_complete(prompt: str) -> str:
             "you're interested in?"
         )
 
-    return "Thanks for your message! How can I help you with NovaGrowth's services today?"
+    return "Thanks for your message! How can I help you today?"
 
 
 def _first_meaningful_lines(text: str, max_lines: int = 2) -> str:

@@ -6,7 +6,14 @@ def test_landing_page_ok(client: TestClient) -> None:
     resp = client.get("/")
     assert resp.status_code == 200
     assert "text/html" in resp.headers["content-type"]
-    assert "NovaGrowth" in resp.text
+    # Generic, configurable product name — not a hardcoded demo company.
+    assert "AI Customer Assistant" in resp.text
+
+
+def test_landing_page_has_no_hardcoded_company(client: TestClient) -> None:
+    # The old demo company must not leak into the shipped UI.
+    resp = client.get("/")
+    assert "NovaGrowth" not in resp.text
 
 
 def test_demo_page_ok(client: TestClient) -> None:
@@ -15,6 +22,21 @@ def test_demo_page_ok(client: TestClient) -> None:
     assert "text/html" in resp.headers["content-type"]
     assert "/static/styles.css" in resp.text
     assert "/static/demo.js" in resp.text
+
+
+def test_demo_page_has_no_hardcoded_company(client: TestClient) -> None:
+    resp = client.get("/demo")
+    assert "NovaGrowth" not in resp.text
+
+
+def test_demo_page_has_suggested_prompts(client: TestClient) -> None:
+    resp = client.get("/demo")
+    assert "Suggested prompts" in resp.text
+    # Suggested prompt buttons send normal messages to /chat.
+    assert 'data-prompt="What services do you provide?"' in resp.text
+    assert 'data-prompt="Can I talk to a human?"' in resp.text
+    # The right panel is the real conversation-state view.
+    assert "Conversation state" in resp.text
 
 
 def test_api_overview_page_ok(client: TestClient) -> None:
@@ -28,7 +50,7 @@ def test_metrics_page_ok(client: TestClient) -> None:
     resp = client.get("/metrics")
     assert resp.status_code == 200
     assert "text/html" in resp.headers["content-type"]
-    assert "Demo metrics" in resp.text
+    assert "Local workspace metrics" in resp.text
 
 
 def test_static_css_loads(client: TestClient) -> None:

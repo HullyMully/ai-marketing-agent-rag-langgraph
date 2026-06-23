@@ -1,11 +1,15 @@
-# NovaGrowth AI Marketing Agent 
+# AI Customer Assistant
 
-A conversational AI agent for a **fictional** digital marketing agency – built with
+A **configurable AI customer assistant** for small companies — built with
 **LangGraph**, **RAG (Qdrant)**, **FastAPI**, a **Telegram bot**, a **mock CRM**,
-support tickets and human escalation.
+support tickets and human escalation. Configure your business profile, upload your
+own knowledge base, connect an LLM provider, and run the assistant locally or
+behind your own API.
 
-> **Portfolio case study for a fictional digital marketing agency. All demo data is fictional.**
-> NovaGrowth Agency is not a real company, and this project is not affiliated with any real business.
+> **Ships with a fictional sample configuration** (a digital marketing studio,
+> `.example` domains only) so it runs end to end out of the box. Replace the
+> sample company profile and knowledge base with your own — see
+> [docs/company-configuration.md](docs/company-configuration.md).
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688)](https://fastapi.tiangolo.com/)
@@ -51,40 +55,40 @@ The web demo's replies all come from the live agent (no scripted flows). See
 [docs/demo/demo-walkthrough.md](docs/demo/demo-walkthrough.md) for the full flow.
 You can also talk to the agent through the Telegram bot.
 
-## What this project demonstrates
+## What it does
 
 - LangGraph-based agent flow
-- RAG over a marketing agency knowledge base
+- RAG over your own company knowledge base
 - Qdrant vector search
 - FastAPI backend
 - Telegram bot integration
-- CRM-style actions and escalation tickets
+- CRM-style lead creation and escalation tickets
 - Session memory and stateful dialogue
 
 It runs end to end with no API keys (mock LLM and embeddings), or against a real
-OpenAI-compatible endpoint when configured.
+OpenAI-compatible endpoint (OpenAI, DeepSeek, etc.) when configured.
 
 ---
 
-## Why this project exists
+## Who it's for
 
-Marketing agencies field a flood of repetitive inbound messages: *"What do you do?"*,
-*"How much is it?"*, *"How does a campaign work?"*, plus genuine leads and the
-occasional complaint that needs a human. This project is a **portfolio prototype** –
-a *realistic demo scenario* **inspired by common marketing agency workflows** – that
-shows how a small AI agent can:
+Small companies field a flood of repetitive inbound messages: *"What do you do?"*,
+*"How much is it?"*, *"How does this work?"*, plus genuine leads and the occasional
+request that needs a human. Configure the assistant with your business profile and
+documents and it can:
 
-1. Answer questions about agency **services** (from a knowledge base / RAG).
-2. Explain **pricing** packages.
-3. **Qualify** incoming leads and collect missing details.
-4. Create a **lead** in a mock CRM.
+1. Answer questions about your **services** (from your knowledge base / RAG).
+2. Explain **pricing**.
+3. **Qualify** incoming leads and collect the missing details across turns.
+4. Create a structured **lead** in a CRM-style store.
 5. Create **support / escalation tickets**.
-6. Answer **internal** questions from a knowledge base.
-7. **Route** complex cases to a human manager.
+6. Answer questions grounded in your own documents.
+7. **Route** complex cases to a human.
 8. Keep **conversation context** across messages.
 
-It is intentionally an **MVP**: clean, readable, and focused on demonstrating the
-skills a Junior/Middle Python AI Engineer is hired for – not a production system.
+The shipped sample profile and knowledge base are fictional and use `.example`
+domains; replace them with your own — see
+[Configure your company](#configure-your-company).
 
 ## Key features
 
@@ -97,7 +101,7 @@ skills a Junior/Middle Python AI Engineer is hired for – not a production syst
 - **Mock CRM** + **support tickets** persisted in SQLite via a clean repository layer.
 - **Session memory** – the agent remembers details (name, contact, service) within a session.
 - **Telegram bot** (aiogram) that talks to the API.
-- **Demo metrics** endpoint (conversations, leads, tickets, escalation / resolved-by-AI rates).
+- **Workspace metrics** endpoint (conversations, leads, tickets, escalation / resolved-by-AI rates).
 - **Docker Compose** (app + Qdrant, optional bot), **pytest** suite, and thorough docs.
 - **Runs with zero API keys** in `MOCK_LLM` + mock-embeddings demo mode.
 
@@ -182,6 +186,43 @@ uvicorn app.main:app --reload
 
 Open the interactive docs at **http://localhost:8000/docs**.
 
+## Configure your company
+
+The assistant is configurable — it has no company baked in. The business profile is
+resolved from, in increasing priority:
+
+1. built-in safe fallbacks,
+2. `config/company.example.json` (the shipped fictional sample),
+3. `config/company.local.json` (your real deployment — **git-ignored**),
+4. environment variables.
+
+To configure your own company, either set environment variables in `.env`:
+
+```env
+COMPANY_NAME="Acme Growth Studio"
+COMPANY_DOMAIN="acme.example"
+COMPANY_DESCRIPTION="Digital marketing and customer acquisition agency"
+COMPANY_CONTACT_EMAIL="hello@acme.example"
+DEFAULT_ASSISTANT_NAME="AI Assistant"
+DEFAULT_ESCALATION_TARGET="human manager"
+BUSINESS_INDUSTRY="digital marketing"
+```
+
+…or copy the JSON template and edit it:
+
+```bash
+cp config/company.local.json.example config/company.local.json
+```
+
+Then replace the sample documents in `knowledge_base/` with your own and re-ingest:
+
+```bash
+python scripts/ingest_knowledge.py
+```
+
+Full instructions: [docs/company-configuration.md](docs/company-configuration.md).
+**Never commit `.env`, API keys, or `config/company.local.json`.**
+
 ### Using a real LLM
 
 Set the following in `.env` to use an OpenAI-compatible endpoint:
@@ -260,12 +301,14 @@ curl http://localhost:8000/metrics/demo
 | GET | `/tickets` | List tickets |
 | GET | `/tickets/{id}` | Get one ticket |
 | POST | `/knowledge/ingest` | (Re)index the knowledge base |
-| GET | `/metrics/demo` | Demo metrics |
+| GET | `/metrics/demo` | Workspace metrics |
 
-## Demo scenarios
+## Example conversations
 
-See [docs/demo-scenarios.md](docs/demo-scenarios.md) for five ready-to-run
-conversations (services, pricing, becoming a lead, escalation, and memory).
+See [docs/demo/demo-walkthrough.md](docs/demo/demo-walkthrough.md) for ready-to-run
+conversations (services, pricing, becoming a lead, escalation, and memory). To drive
+the full lead flow against a running server, use
+`python scripts/test_production_flow.py`.
 
 ## Screenshots
 
@@ -275,10 +318,10 @@ social-preview image prompt.
 
 ## Limitations
 
-This is a portfolio MVP. See [docs/limitations.md](docs/limitations.md) – highlights:
-the mock LLM and mock embeddings are deterministic stand-ins (not semantically
-strong), there is no auth, and the "CRM" is a local SQLite table modelling the
-integration pattern rather than a real SaaS.
+See [docs/limitations.md](docs/limitations.md) – highlights: the mock LLM and mock
+embeddings are deterministic stand-ins (not semantically strong), there is no auth,
+and the "CRM" is a local SQLite table modelling the integration pattern rather than
+a real SaaS connector.
 
 ## Roadmap
 
@@ -287,6 +330,7 @@ auth, evaluation harness, richer analytics dashboard, and more.
 
 ## Documentation
 
+- [Company configuration](docs/company-configuration.md) / [RU](docs/company-configuration.ru.md)
 - [Architecture](docs/architecture.md) / [RU](docs/architecture.ru.md)
 - [API](docs/api.md) / [RU](docs/api.ru.md)
 - [RAG](docs/rag.md) / [RU](docs/rag.ru.md)

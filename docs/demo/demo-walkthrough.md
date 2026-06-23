@@ -2,7 +2,8 @@
 
 🇺🇸English | [🇷🇺Русский](./demo-walkthrough.ru.md)
 
-Five end-to-end flows for the **NovaGrowth AI Marketing Agent**. Everything runs
+Five end-to-end flows for the **AI Customer Assistant** (configured here with the
+fictional sample profile). Everything runs
 in offline mode (`MOCK_LLM=true`, mock embeddings), so no API keys are needed.
 
 > Portfolio case study for a fictional agency. All demo data is fictional (`.example` domains).

@@ -1,4 +1,4 @@
-"""Telegram bot (aiogram) for the NovaGrowth AI marketing agent.
+"""Telegram bot (aiogram) for the AI Customer Assistant.
 
 The bot derives a stable `session_id` from the Telegram user id, forwards
 messages to the FastAPI `/chat` endpoint, and returns the agent's reply.
@@ -20,26 +20,24 @@ from app.config import settings
 from bot.client import AgentAPIClient
 
 logging.basicConfig(level=settings.log_level)
-logger = logging.getLogger("novagrowth.bot")
+logger = logging.getLogger("assistant.bot")
 
 dp = Dispatcher()
 api = AgentAPIClient()
 
 WELCOME = (
-    "👋 Hi! I'm Nova, the assistant for *NovaGrowth Agency* (a fictional demo "
-    "agency).\n\n"
-    "Ask me about our services, pricing, or campaign workflow. Want to work with "
-    "us? Just say so and I'll get you set up.\n\n"
+    "👋 Hi! I'm your AI assistant. Ask about our services or pricing, or tell me "
+    "about a project you need help with and I'll get you set up.\n\n"
     "Type /help for examples."
 )
 
 HELP = (
     "Try messages like:\n"
     "• What services do you offer?\n"
-    "• How much does the Growth package cost?\n"
-    "• I want to run Google Ads, my name is Sam, sam@acme.example\n"
-    "• Can I speak with a human manager?\n\n"
-    "_This is a portfolio demo. The agency and all data are fictional._"
+    "• How much does it cost?\n"
+    "• I need help with a new project\n"
+    "• Can I talk to a human?\n\n"
+    "_Sample data shipped with this assistant is fictional and uses .example domains._"
 )
 
 
@@ -82,7 +80,7 @@ async def main() -> None:
             "TELEGRAM_BOT_TOKEN is not set. Add it to your .env file."
         )
     bot = Bot(token=settings.telegram_bot_token)
-    logger.info("Starting NovaGrowth Telegram bot...")
+    logger.info("Starting Telegram bot...")
     await dp.start_polling(bot)
 
 

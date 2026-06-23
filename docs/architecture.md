@@ -2,7 +2,8 @@
 
 🇺🇸English | [🇷🇺Русский](./architecture.ru.md)
 
-> Portfolio prototype for the fictional **NovaGrowth Agency**. All data is synthetic.
+> Configurable AI customer assistant platform. Ships with a fictional sample
+> company profile and knowledge base (`.example` domains); replace them with your own.
 
 ## Overview
 
