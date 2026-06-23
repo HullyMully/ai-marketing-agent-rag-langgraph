@@ -46,6 +46,7 @@
 - Дашборд метрик: <http://localhost:8000/metrics>
 - Swagger-документация: <http://localhost:8000/docs>
 
+Ответы в веб-демо полностью генерирует живой агент (без скриптовых сценариев).
 Подробнее – в [docs/web-demo.md](docs/web-demo.md), полный сценарий –
 в [docs/demo/demo-walkthrough.md](docs/demo/demo-walkthrough.md). С агентом также
 можно общаться через Telegram-бот.
@@ -144,7 +145,7 @@ stateDiagram-v2
     [*] --> classify_intent
     classify_intent --> retrieve_knowledge
     retrieve_knowledge --> decide_action
-    decide_action --> escalate_to_human: человек / низкая уверенность
+    decide_action --> escalate_to_human: явный запрос человека
     decide_action --> collect_missing_info: лид, не хватает данных
     decide_action --> call_tool: лид, данные собраны
     decide_action --> generate_answer: услуги / цены / процесс

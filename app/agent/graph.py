@@ -1,38 +1,34 @@
 """The stateful conversational agent, implemented with LangGraph.
 
-Graph nodes (states):
-    classify_intent -> retrieve_knowledge -> decide_action -> {
-        collect_missing_info | call_tool | generate_answer | escalate_to_human
-    }
+The agent behaves like a real sales/support assistant for NovaGrowth:
 
-The graph makes realistic routing decisions:
-* Service/pricing/campaign questions are answered from the RAG knowledge base.
-* A user who wants to work with the agency is qualified; once name + contact are
-  known a CRM lead is created.
-* Explicit human requests or low-confidence turns create an escalation ticket.
-* Missing lead info triggers a short follow-up question.
+* Service / pricing / support questions are answered from the knowledge base (RAG).
+* Prospects are qualified across several turns into a session **lead draft**
+  (name, company, contact email, service interest, budget). A CRM lead is created
+  only once all required fields are known — never after just a name + email — and
+  never twice in the same session.
+* Explicit human/manager requests (or clearly complex enterprise needs) create a
+  ticket. Unclear messages get a short clarifying question, not a ticket.
 """
 from __future__ import annotations
 
 from langgraph.graph import END, StateGraph
 
 from app.agent.llm import get_llm
-from app.agent.memory import extract_slots, get_memory
+from app.agent.memory import REQUIRED_FIELDS, extract_fields, get_memory
 from app.agent.prompts import RAG_ANSWER_PROMPT, SYSTEM_PERSONA
 from app.agent.state import AgentState
-from app.config import settings
 from app.rag.retriever import get_retriever
 from app.tools.crm_tools import create_lead
 from app.tools.escalation import escalate_to_human
 
-# Intents that should be answered from the knowledge base via RAG.
-_KNOWLEDGE_INTENTS = {
-    "service_question",
-    "pricing_question",
-    "campaign_status_question",
-    "general_question",
-    "support_request",
-}
+_KNOWLEDGE_INTENTS = {"service_question", "pricing_question", "support_request"}
+_LEAD_INTENTS = {"greeting", "lead_qualification", "create_lead"}
+
+_NEW_REQUEST_HINTS = (
+    "new request", "another lead", "different company", "start over",
+    "new project", "new client", "second lead", "new lead",
+)
 
 
 def _history_text(history: list[dict[str, str]], limit: int = 6) -> str:
@@ -42,23 +38,32 @@ def _history_text(history: list[dict[str, str]], limit: int = 6) -> str:
     return "\n".join(f"{turn['role']}: {turn['content']}" for turn in recent)
 
 
+def _is_new_request(message: str) -> bool:
+    text = message.lower()
+    return any(h in text for h in _NEW_REQUEST_HINTS)
+
+
 # --------------------------------------------------------------------------- #
 # Nodes
 # --------------------------------------------------------------------------- #
 def classify_intent_node(state: AgentState) -> AgentState:
-    """Classify intent and capture any lead details from the message."""
+    """Classify intent and merge any extracted lead fields into the draft."""
     from app.agent.intent import classify_intent
 
     intent, confidence = classify_intent(state["user_message"])
     state["intent"] = intent
     state["confidence"] = confidence
 
-    # Always try to remember lead details, regardless of intent.
     memory = get_memory()
-    extracted = extract_slots(state["user_message"])
-    if extracted:
-        memory.update_slots(state["session_id"], extracted)
-    state["slots"] = memory.get_slots(state["session_id"])
+    session = state["session_id"]
+
+    if _is_new_request(state["user_message"]) and memory.is_lead_created(session):
+        memory.reset_draft(session)
+
+    extracted = extract_fields(state["user_message"])
+    state["extracted"] = extracted
+    if extracted and not memory.is_lead_created(session):
+        memory.update_draft(session, extracted)
     return state
 
 
@@ -75,89 +80,146 @@ def retrieve_knowledge_node(state: AgentState) -> AgentState:
 
 
 def decide_action_node(state: AgentState) -> AgentState:
-    """Decide which terminal action the graph should route to."""
+    """Route the turn, driven by intent AND the current lead draft."""
     memory = get_memory()
+    session = state["session_id"]
     intent = state.get("intent", "unknown")
-    confidence = state.get("confidence", 0.0)
+    extracted_any = bool(state.get("extracted"))
 
-    if intent == "human_escalation" or confidence < settings.escalation_confidence_threshold:
+    if intent == "human_escalation":
         state["route"] = "escalate"
-    elif intent == "create_lead":
-        missing = memory.missing_required(state["session_id"])
-        state["missing_fields"] = missing
-        state["route"] = "collect" if missing else "tool"
-    else:
+    elif intent in _KNOWLEDGE_INTENTS:
         state["route"] = "answer"
+    elif intent == "memory_question":
+        state["route"] = "memory"
+    elif memory.is_lead_created(session):
+        # A lead already exists this session — never create a duplicate.
+        state["route"] = "lead_exists"
+    elif intent in _LEAD_INTENTS or extracted_any:
+        state["route"] = "collect" if memory.missing_fields(session) else "tool"
+    else:
+        state["route"] = "clarify"
     return state
 
 
 def collect_missing_info_node(state: AgentState) -> AgentState:
-    """Ask a short follow-up question for missing lead fields."""
-    missing = state.get("missing_fields", []) or ["name", "contact"]
-    pretty = {
-        "name": "your name",
-        "contact": "the best email or phone to reach you",
-        "company": "your company",
-        "service_interest": "which service you're interested in",
-        "budget_range": "a rough monthly budget",
-    }
-    asks = ", ".join(pretty.get(m, m) for m in missing)
-    state["answer"] = (
-        "I'd be glad to help you get started with NovaGrowth! Could you share "
-        f"{asks}? That way I can set you up with the right specialist."
-    )
-    state["action_taken"] = "collect_missing_info"
+    """Ask one natural follow-up for the next missing lead fields."""
+    memory = get_memory()
+    missing = memory.missing_fields(state["session_id"])
+    state["missing_fields"] = missing
+
+    if "service_interest" in missing:
+        answer = (
+            "Welcome! What kind of marketing help are you looking for — paid ads, "
+            "a landing page audit, analytics setup, or campaign optimization?"
+        )
+    elif "company" in missing or "budget_range" in missing:
+        needs = []
+        if "company" in missing:
+            needs.append("which company you're with")
+        if "budget_range" in missing:
+            needs.append("your rough monthly budget")
+        answer = "Got it. Could you tell me " + " and ".join(needs) + "?"
+    elif "name" in missing or "contact_email" in missing:
+        needs = []
+        if "name" in missing:
+            needs.append("your name")
+        if "contact_email" in missing:
+            needs.append("the best email for follow-up")
+        answer = "Thanks. What's " + " and ".join(needs) + "?"
+    else:  # pragma: no cover - defensive
+        answer = "Could you share a little more about what you need?"
+
+    state["answer"] = answer
+    state["action_taken"] = "collecting_info"
     return state
 
 
 def call_tool_node(state: AgentState) -> AgentState:
-    """Create a CRM lead from the collected slots."""
+    """Create the CRM lead once the draft is complete."""
     memory = get_memory()
-    slots = memory.get_slots(state["session_id"])
+    session = state["session_id"]
+    draft = memory.get_draft(session)
+
+    budget = draft.get("budget_range") or ("unspecified" if draft.get("budget_unknown") else "")
     lead = create_lead(
-        name=slots.get("name", "Unknown"),
-        contact=slots.get("contact", "unspecified"),
-        company=slots.get("company"),
-        service_interest=slots.get("service_interest"),
-        budget_range=slots.get("budget_range", "unspecified"),
+        name=draft["name"],
+        contact=draft["contact_email"],
+        company=draft["company"],
+        service_interest=draft["service_interest"],
+        budget_range=budget or "unspecified",
         message=state["user_message"],
     )
+    memory.mark_lead_created(session, lead["id"])
     state["created_lead_id"] = lead["id"]
     state["action_taken"] = "created_lead"
-    memory.clear_slots(state["session_id"])
 
-    svc = slots.get("service_interest", "your goals")
-    company = slots.get("company")
-    for_company = f" for {company}" if company else ""
+    service = (draft["service_interest"] or "").lower()
+    budget_phrase = f"{budget} budget" if budget and budget != "unspecified" else "budget to confirm"
     state["answer"] = (
-        f"You're all set, {slots.get('name', 'there')}! I've created a lead"
-        f"{for_company} (#{lead['id']}) for {svc}. A NovaGrowth manager will "
-        f"follow up with you at {slots.get('contact')} shortly. "
-        "Anything else I can help with?"
+        f"Done. I created a lead for {draft['company']}: {service}, {budget_phrase}, "
+        f"contact {draft['name']} at {draft['contact_email']}."
     )
+    return state
+
+
+def lead_exists_node(state: AgentState) -> AgentState:
+    """Acknowledge an already-created lead without making a duplicate."""
+    draft = get_memory().get_draft(state["session_id"])
+    state["answer"] = (
+        f"You're already set — I created lead #{draft.get('lead_id')} for "
+        f"{draft.get('company')}. Want to start a new request or change anything?"
+    )
+    state["action_taken"] = "lead_already_exists"
+    return state
+
+
+def clarify_node(state: AgentState) -> AgentState:
+    """Ask one short clarifying question (never a ticket)."""
+    state["answer"] = (
+        "Sorry, I didn't quite catch that. Could you tell me a bit more — are you "
+        "after our services, pricing, or help starting a project?"
+    )
+    state["action_taken"] = "asked_clarification"
+    return state
+
+
+def memory_answer_node(state: AgentState) -> AgentState:
+    """Answer a recall question from the session's lead draft."""
+    draft = get_memory().get_draft(state["session_id"])
+    state["memory_used"] = True
+    parts: list[str] = []
+    if draft.get("company"):
+        parts.append(draft["company"])
+    if draft.get("service_interest"):
+        parts.append(draft["service_interest"].lower())
+    if draft.get("budget_range"):
+        parts.append(f"{draft['budget_range']} budget")
+    if parts:
+        state["answer"] = "So far you've mentioned " + ", ".join(parts) + "."
+    else:
+        state["answer"] = (
+            "I don't have those details yet. What company are you with, and what "
+            "are you looking for help with?"
+        )
+    state["action_taken"] = "answered_with_memory"
     return state
 
 
 def escalate_to_human_node(state: AgentState) -> AgentState:
     """Create a high-priority escalation ticket for a human manager."""
-    reason = (
-        "human_escalation"
-        if state.get("intent") == "human_escalation"
-        else "low_confidence"
-    )
     ticket = escalate_to_human(
         user_id=state.get("user_id") or state["session_id"],
         summary=f"User message: {state['user_message']}",
-        reason=reason,
+        reason="human_escalation",
     )
     state["created_ticket_id"] = ticket["id"]
     state["escalated"] = True
+    state["ticket_created"] = True
     state["action_taken"] = "escalated_to_human"
     state["answer"] = (
-        "I've flagged this for a human manager at NovaGrowth "
-        f"(ticket #{ticket['id']}). Someone will follow up with you, usually "
-        "within one business day. Is there anything else I can help with in the "
-        "meantime?"
+        "I've passed this to a human manager at NovaGrowth "
+        f"(ticket #{ticket['id']}). They'll follow up within one business day."
     )
     return state
 
@@ -177,7 +239,7 @@ def generate_answer_node(state: AgentState) -> AgentState:
 
 
 def _route(state: AgentState) -> str:
-    return state.get("route", "answer")
+    return state.get("route", "clarify")
 
 
 # --------------------------------------------------------------------------- #
@@ -192,6 +254,9 @@ def build_graph():
     graph.add_node("decide_action", decide_action_node)
     graph.add_node("collect_missing_info", collect_missing_info_node)
     graph.add_node("call_tool", call_tool_node)
+    graph.add_node("lead_exists", lead_exists_node)
+    graph.add_node("clarify", clarify_node)
+    graph.add_node("memory_answer", memory_answer_node)
     graph.add_node("generate_answer", generate_answer_node)
     graph.add_node("escalate_to_human", escalate_to_human_node)
 
@@ -204,16 +269,20 @@ def build_graph():
         _route,
         {
             "escalate": "escalate_to_human",
+            "answer": "generate_answer",
+            "memory": "memory_answer",
             "collect": "collect_missing_info",
             "tool": "call_tool",
-            "answer": "generate_answer",
+            "lead_exists": "lead_exists",
+            "clarify": "clarify",
         },
     )
 
-    graph.add_edge("collect_missing_info", END)
-    graph.add_edge("call_tool", END)
-    graph.add_edge("escalate_to_human", END)
-    graph.add_edge("generate_answer", END)
+    for node in (
+        "collect_missing_info", "call_tool", "lead_exists", "clarify",
+        "memory_answer", "generate_answer", "escalate_to_human",
+    ):
+        graph.add_edge(node, END)
 
     return graph.compile()
 
@@ -232,7 +301,7 @@ def get_agent():
 def run_agent(
     *, session_id: str, user_message: str, user_id: str | None = None
 ) -> AgentState:
-    """Execute one turn of the conversation through the graph."""
+    """Execute one turn and return product-friendly metadata."""
     memory = get_memory()
     history = memory.history(session_id)
 
@@ -241,11 +310,13 @@ def run_agent(
         "user_id": user_id,
         "user_message": user_message,
         "history": history,
+        "extracted": {},
         "retrieved": [],
         "sources": [],
-        "slots": {},
         "missing_fields": [],
+        "memory_used": False,
         "escalated": False,
+        "ticket_created": False,
         "action_taken": None,
         "created_lead_id": None,
         "created_ticket_id": None,
@@ -253,20 +324,26 @@ def run_agent(
 
     result: AgentState = get_agent().invoke(state)
 
-    # Persist this turn to memory for future context + metrics.
+    # Derive clean product metadata from the session draft.
+    draft = memory.get_draft(session_id)
+    lead_created = bool(draft.get("lead_created"))
+    result["lead_draft"] = memory.known_fields(session_id)
+    result["missing_fields"] = [] if lead_created else memory.missing_fields(session_id)
+    result["lead_created"] = lead_created
+    result["lead_id"] = draft.get("lead_id")
+    result["ticket_created"] = bool(result.get("created_ticket_id"))
+
     memory.add_turn(
-        session_id=session_id,
-        role="user",
-        content=user_message,
-        user_id=user_id,
-        intent=result.get("intent"),
+        session_id=session_id, role="user", content=user_message,
+        user_id=user_id, intent=result.get("intent"),
     )
     memory.add_turn(
-        session_id=session_id,
-        role="assistant",
-        content=result.get("answer", ""),
-        user_id=user_id,
-        intent=result.get("intent"),
+        session_id=session_id, role="assistant", content=result.get("answer", ""),
+        user_id=user_id, intent=result.get("intent"),
         escalated=bool(result.get("escalated")),
     )
     return result
+
+
+# Required fields are re-exported for callers/tests that want them.
+__all__ = ["run_agent", "get_agent", "build_graph", "REQUIRED_FIELDS"]

@@ -23,17 +23,22 @@ class AgentState(TypedDict, total=False):
     # --- routing ---
     route: str
 
+    # --- extraction / lead draft ---
+    extracted: dict[str, Any]
+    lead_draft: dict[str, Any]
+    missing_fields: list[str]
+    lead_created: bool
+    lead_id: int | None
+
     # --- retrieval ---
     retrieved: list[str]
     sources: list[str]
-
-    # --- lead collection ---
-    slots: dict[str, Any]
-    missing_fields: list[str]
+    memory_used: bool
 
     # --- outputs / side effects ---
     answer: str
     action_taken: str | None
     escalated: bool
+    ticket_created: bool
     created_lead_id: int | None
     created_ticket_id: int | None

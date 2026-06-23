@@ -46,7 +46,8 @@ a browser:
 - Metrics dashboard: <http://localhost:8000/metrics>
 - Swagger docs: <http://localhost:8000/docs>
 
-See [docs/web-demo.md](docs/web-demo.md) for details, or
+The web demo's replies all come from the live agent (no scripted flows). See
+[docs/web-demo.md](docs/web-demo.md) for details, or
 [docs/demo/demo-walkthrough.md](docs/demo/demo-walkthrough.md) for the full flow.
 You can also talk to the agent through the Telegram bot.
 
@@ -143,7 +144,7 @@ stateDiagram-v2
     [*] --> classify_intent
     classify_intent --> retrieve_knowledge
     retrieve_knowledge --> decide_action
-    decide_action --> escalate_to_human: human / low confidence
+    decide_action --> escalate_to_human: explicit human request
     decide_action --> collect_missing_info: lead, missing info
     decide_action --> call_tool: lead, info complete
     decide_action --> generate_answer: service / pricing / workflow

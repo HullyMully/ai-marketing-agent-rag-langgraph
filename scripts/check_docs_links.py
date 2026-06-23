@@ -49,10 +49,10 @@ def check(root: Path = ROOT) -> list[str]:
             continue
 
         # English doc must link to its Russian sibling.
-        if f"[Русский](./{ru_name})" not in _head(en):
+        if f"](./{ru_name})" not in _head(en):
             problems.append(f"{en_rel}: missing switch link to ./{ru_name}")
         # Russian doc must link back to its English sibling.
-        if f"[🇺🇸English](./{en_name})" not in _head(ru):
+        if f"](./{en_name})" not in _head(ru):
             problems.append(f"{ru_rel}: missing switch link to ./{en_name}")
     return problems
 

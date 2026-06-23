@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NovaGrowth AI Assistant — Demo</title>
-  <link rel="stylesheet" href="/static/styles.css?v=3">
+  <link rel="stylesheet" href="/static/styles.css?v=4">
 </head>
 <body>
   <header class="app-header">
@@ -33,7 +33,9 @@
         <button class="qa" data-scenario="human"><span class="qa-ic"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>Human escalation</button>
         <button class="qa" data-scenario="memory"><span class="qa-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Memory follow-up</button>
       </div>
-      <p class="hint">Run a quick action, or type your own message below.</p>
+      <p class="hint">Quick actions send a first message to the assistant. Reply in
+        the box to continue the conversation.</p>
+      <button id="new-chat" type="button" class="btn btn-ghost btn-block">New conversation</button>
     </aside>
 
     <!-- Center: chat -->
@@ -60,20 +62,21 @@
       </form>
     </section>
 
-    <!-- Right: workflow result -->
+    <!-- Right: workflow result (real session state) -->
     <aside class="col result-col card">
       <div class="section-title">Workflow result</div>
 
       <div id="result-empty" class="result-empty">
-        <p>Run a quick action to see the workflow result.</p>
+        <p>Start chatting to see the assistant's working state.</p>
         <div class="chips">
           <div class="chip"><span class="sw sw-teal"></span>Answers from knowledge base</div>
-          <div class="chip"><span class="sw sw-green"></span>CRM lead creation</div>
+          <div class="chip"><span class="sw sw-green"></span>Multi-step lead qualification</div>
           <div class="chip"><span class="sw sw-red"></span>Escalation to a manager</div>
         </div>
       </div>
 
       <div id="result" class="result-stack hidden">
+        <!-- lead created -->
         <div id="rc-lead" class="rcard lead hidden">
           <div class="rcard-head"><span class="rdot green"></span>Lead created</div>
           <dl class="rbody">
@@ -85,6 +88,18 @@
           </dl>
         </div>
 
+        <!-- lead draft (in progress) -->
+        <div id="rc-draft" class="rcard hidden">
+          <div class="rcard-head muted">Lead draft</div>
+          <div class="rbody-block">
+            <div class="block-label">Known</div>
+            <dl id="draft-known" class="rbody"></dl>
+            <div class="block-label">Missing</div>
+            <ul id="draft-missing" class="missing-list"></ul>
+          </div>
+        </div>
+
+        <!-- ticket -->
         <div id="rc-ticket" class="rcard ticket hidden">
           <div class="rcard-head"><span class="rdot amber"></span>Ticket created</div>
           <dl class="rbody">
@@ -95,15 +110,27 @@
           </dl>
         </div>
 
+        <!-- knowledge sources -->
+        <div id="rc-sources" class="rcard hidden">
+          <div class="rcard-head muted">Knowledge sources</div>
+          <div id="r-sources" class="rline">—</div>
+        </div>
+
+        <!-- memory -->
+        <div id="rc-memory" class="rcard hidden">
+          <div class="rcard-head muted">Session memory</div>
+          <div class="rline">Used to answer from earlier details.</div>
+        </div>
+
+        <!-- current workflow -->
         <div class="rcard">
-          <div class="rcard-head muted">Summary</div>
-          <div id="r-headline" class="rline hidden">—</div>
-          <dl id="r-rows" class="rbody"></dl>
+          <div class="rcard-head muted">Current workflow</div>
+          <div id="r-workflow" class="rline">—</div>
         </div>
       </div>
     </aside>
   </main>
 
-  <script src="/static/demo.js?v=3" defer></script>
+  <script src="/static/demo.js?v=4" defer></script>
 </body>
 </html>

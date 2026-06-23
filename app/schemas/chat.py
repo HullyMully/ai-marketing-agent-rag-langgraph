@@ -1,6 +1,8 @@
 """Pydantic schemas for the chat endpoint."""
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -13,14 +15,27 @@ class ChatRequest(BaseModel):
 
 
 class ChatResponse(BaseModel):
-    """Agent reply plus useful debug/telemetry fields."""
+    """Agent reply plus clean product metadata for the UI."""
 
     session_id: str
     answer: str
     intent: str
-    escalated: bool = False
-    action_taken: str | None = None
-    created_lead_id: int | None = None
-    created_ticket_id: int | None = None
-    confidence: float = 1.0
+    action: str | None = None
+
+    # Lead qualification
+    lead_draft: dict[str, Any] = Field(default_factory=dict)
+    missing_fields: list[str] = Field(default_factory=list)
+    lead_created: bool = False
+    lead_id: int | None = None
+
+    # Escalation
+    ticket_created: bool = False
+    ticket_id: int | None = None
+
+    # Knowledge / memory
     sources: list[str] = Field(default_factory=list)
+    memory_used: bool = False
+
+    # Telemetry (kept for compatibility)
+    escalated: bool = False
+    confidence: float = 1.0

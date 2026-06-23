@@ -25,28 +25,16 @@ uvicorn app.main:app --reload
 
 ## Chat demo
 
-The left sidebar has quick actions. Each one plays a clean, deterministic flow and
-fills the right-hand **Workflow result** panel:
+Every reply comes from the real agent (`POST /chat`). The quick-action buttons
+just send a realistic first message — you continue the conversation by typing.
 
-- **Lead creation flow** — qualifies a prospect and shows the lead card
-- **Services Q&A** — answered from the knowledge base
-- **Pricing from RAG** — pricing answered from the knowledge base
-- **Human escalation** — opens a ticket and shows the ticket card
-- **Memory follow-up** — the assistant reuses details from earlier in the session
+- **Services Q&A** / **Pricing from RAG** — answered from the knowledge base
+- **Lead creation flow** — starts a multi-step qualification; reply with company,
+  budget, name and email and the agent creates a CRM lead once it has them all
+- **Human escalation** — opens a ticket for a manager
+- **Memory follow-up** — the agent recalls details collected earlier in the session
 
-Quick actions render a product-quality conversation and also call the backend
-quietly, so leads, tickets and metrics stay real. Typing your own message runs a
-live `POST /chat` and shows the actual answer.
-
-## Suggested screenshots
-
-Capture at 1440×900:
-
-1. **Landing page** — `/`
-2. **Lead creation flow** — run the quick action in `/demo`
-3. **Escalation flow** — run the quick action in `/demo`
-4. **API overview** — `/api-overview`
-5. **Metrics dashboard** — `/metrics`
-
-All demo data is fictional and uses the `.example` domain. Keep tokens and any
-personal data out of frame.
+The right-hand **Workflow result** panel shows the live session state: the lead
+draft with its known and missing fields, a created lead or ticket, any knowledge
+sources used, and whether session memory was used. A lead is shown as *created*
+only once company, service, budget, name and email are all known.

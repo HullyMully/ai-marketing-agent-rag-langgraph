@@ -11,10 +11,11 @@ router = APIRouter(tags=["chat"])
 
 @router.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest) -> ChatResponse:
-    """Send a user message to the agent and return its reply.
+    """Send a user message to the agent and return its reply plus session state.
 
-    The agent is stateful: pass the same `session_id` across turns and it will
-    remember context (e.g., lead details collected earlier).
+    The agent is stateful: pass the same `session_id` across turns and it builds
+    up a lead draft, remembers details, and only creates a CRM lead once the
+    required fields are all known.
     """
     result = run_agent(
         session_id=request.session_id,
@@ -25,10 +26,15 @@ def chat(request: ChatRequest) -> ChatResponse:
         session_id=request.session_id,
         answer=result.get("answer", ""),
         intent=result.get("intent", "unknown"),
-        escalated=bool(result.get("escalated")),
-        action_taken=result.get("action_taken"),
-        created_lead_id=result.get("created_lead_id"),
-        created_ticket_id=result.get("created_ticket_id"),
-        confidence=float(result.get("confidence", 1.0)),
+        action=result.get("action_taken"),
+        lead_draft=result.get("lead_draft", {}),
+        missing_fields=result.get("missing_fields", []),
+        lead_created=bool(result.get("lead_created")),
+        lead_id=result.get("lead_id"),
+        ticket_created=bool(result.get("ticket_created")),
+        ticket_id=result.get("created_ticket_id"),
         sources=result.get("sources", []),
+        memory_used=bool(result.get("memory_used")),
+        escalated=bool(result.get("escalated")),
+        confidence=float(result.get("confidence", 1.0)),
     )

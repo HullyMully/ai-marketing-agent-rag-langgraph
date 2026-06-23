@@ -1,128 +1,66 @@
 /* NovaGrowth AI Assistant — web demo client.
-   Plain JS, no dependencies.
-
-   Quick actions render clean, deterministic flows (and quietly call the backend
-   so leads, tickets and metrics stay real). Typing a message runs POST /chat
-   live and shows a humanised result. */
+   Plain JS, no dependencies. Every reply comes from the real agent via
+   POST /chat. Quick actions only send a realistic first user message; the
+   right panel renders the actual session state returned by the backend. */
 (function () {
   "use strict";
 
   var SESSION_KEY = "novagrowth_demo_session_id";
 
-  /* ---------- scripted, screenshot-ready scenarios ---------- */
-  var SCENARIOS = {
-    lead: {
-      messages: [
-        ["assistant", "Hi, I'm NovaGrowth AI. I can answer questions, qualify leads and create CRM records for the marketing team."],
-        ["user", "Hi, we need help launching paid ads for our SaaS product."],
-        ["assistant", "Sure. What monthly ad budget are you planning, and who should the team contact?"],
-        ["user", "My name is Sam. I work at BrightDesk. Budget is around $5k/month. Contact me at sam@brightdesk.example."],
-        ["assistant", "Done. I created a new lead for BrightDesk and routed it to the marketing team. A manager will follow up with Sam at sam@brightdesk.example."]
-      ],
-      panel: {
-        lead: { company: "BrightDesk", contact: "sam@brightdesk.example",
-                service: "Paid acquisition", budget: "$5k/month", status: "new" },
-        rows: [["Workflow", "Lead qualification"], ["Knowledge", "Not required"], ["Escalated", "No"]]
-      },
-      backend: ["Hi, my name is Sam. I work at BrightDesk. We need help launching paid " +
-                "ads for our SaaS product. Budget is around $5k/month. Contact me at " +
-                "sam@brightdesk.example."]
-    },
-
-    services: {
-      messages: [
-        ["user", "What services does NovaGrowth provide?"],
-        ["assistant", "NovaGrowth supports paid acquisition, landing page audits, analytics setup, campaign optimization and reporting workflows."]
-      ],
-      panel: {
-        headline: "Answered from knowledge base",
-        rows: [["Source", "services.md"], ["Workflow", "RAG answer"]]
-      },
-      backend: ["What services does NovaGrowth provide?"]
-    },
-
-    pricing: {
-      messages: [
-        ["user", "What pricing packages are available?"],
-        ["assistant", "We offer three packages: Starter at $1,500/mo for a single channel, " +
-                      "Growth at $3,500/mo for multi-channel campaigns, and Scale at $7,000/mo " +
-                      "with dedicated strategy and reporting."]
-      ],
-      panel: {
-        headline: "Answered from knowledge base",
-        rows: [["Source", "pricing.md"], ["Workflow", "RAG answer"]]
-      },
-      backend: ["What pricing packages are available?"]
-    },
-
-    human: {
-      messages: [
-        ["user", "I need a human manager for a custom enterprise marketing workflow."],
-        ["assistant", "I created an escalation ticket for a human manager. The team will review the request and follow up within one business day."]
-      ],
-      panel: {
-        ticket: { id: "TCK-1024", reason: "Custom enterprise marketing workflow",
-                  priority: "medium", status: "open" },
-        rows: [["Workflow", "Human escalation"], ["Escalated", "Yes"]]
-      },
-      backend: ["I need a human manager for a custom enterprise marketing workflow."]
-    },
-
-    memory: {
-      messages: [
-        ["user", "Hi, we need help launching paid ads. I'm Sam from BrightDesk, budget around $5k/month."],
-        ["assistant", "Got it, Sam — noted BrightDesk and a paid acquisition request at around $5k/month."],
-        ["user", "Can you remind me what company I mentioned?"],
-        ["assistant", "You mentioned BrightDesk. The current request is about paid acquisition with a budget around $5k/month."]
-      ],
-      panel: {
-        headline: "Session memory used",
-        rows: [["Company", "BrightDesk"], ["Topic", "Paid acquisition"], ["Budget", "$5k/month"]]
-      },
-      backend: []
-    }
+  // Quick actions send a single, realistic opening message to the real agent.
+  var QUICK_MESSAGES = {
+    services: "What services does NovaGrowth provide?",
+    pricing: "What pricing packages are available?",
+    lead: "Hi, we need help launching paid ads for our SaaS product.",
+    human: "I need a human manager for a custom enterprise marketing workflow.",
+    memory: "What company and budget have I mentioned so far?"
   };
 
-  /* ---------- humanise live backend values ---------- */
-  var INTENT_LABEL = {
-    service_question: "Service question",
-    pricing_question: "Pricing question",
-    create_lead: "Lead qualification",
-    campaign_status_question: "Campaign question",
-    support_request: "Support request",
-    human_escalation: "Human escalation",
-    general_question: "General question",
-    unknown: "General question"
+  var FIELD_LABELS = {
+    name: "Name",
+    company: "Company",
+    contact_email: "Contact email",
+    service_interest: "Service",
+    budget_range: "Budget"
   };
+
   var ACTION_LABEL = {
-    answered_from_kb: "Answered from knowledge base",
+    collecting_info: "Qualifying lead",
     created_lead: "Lead created",
+    lead_already_exists: "Lead already created",
+    answered_from_kb: "Answered from knowledge base",
     escalated_to_human: "Escalated to a manager",
-    collect_missing_info: "Collecting a few details"
+    answered_with_memory: "Used session memory",
+    asked_clarification: "Asked for clarification"
   };
 
   var chat = document.getElementById("chat");
   var form = document.getElementById("chat-form");
   var input = document.getElementById("message");
   var sendBtn = document.getElementById("send");
+  var newChatBtn = document.getElementById("new-chat");
   var emptyChat = document.getElementById("empty-chat");
 
   var els = {
     empty: document.getElementById("result-empty"),
     result: document.getElementById("result"),
     rcLead: document.getElementById("rc-lead"),
+    rcDraft: document.getElementById("rc-draft"),
     rcTicket: document.getElementById("rc-ticket"),
+    rcSources: document.getElementById("rc-sources"),
+    rcMemory: document.getElementById("rc-memory"),
     lCompany: document.getElementById("l-company"),
     lContact: document.getElementById("l-contact"),
     lService: document.getElementById("l-service"),
     lBudget: document.getElementById("l-budget"),
-    lStatus: document.getElementById("l-status"),
+    draftKnown: document.getElementById("draft-known"),
+    draftMissing: document.getElementById("draft-missing"),
     tId: document.getElementById("t-id"),
     tReason: document.getElementById("t-reason"),
     tPriority: document.getElementById("t-priority"),
     tStatus: document.getElementById("t-status"),
-    headline: document.getElementById("r-headline"),
-    rows: document.getElementById("r-rows")
+    sources: document.getElementById("r-sources"),
+    workflow: document.getElementById("r-workflow")
   };
 
   var lastRole = null;
@@ -135,11 +73,6 @@
   function getSessionId() {
     var id = localStorage.getItem(SESSION_KEY);
     if (!id) { id = newSessionId(); localStorage.setItem(SESSION_KEY, id); }
-    return id;
-  }
-  function resetSession() {
-    var id = newSessionId();
-    localStorage.setItem(SESSION_KEY, id);
     return id;
   }
 
@@ -179,58 +112,86 @@
     return wrap;
   }
 
-  function clearChat() {
-    chat.innerHTML = "";
-    if (emptyChat) { chat.appendChild(emptyChat); emptyChat.style.display = ""; }
-    lastRole = null;
-  }
-
   /* ---------- result panel ---------- */
   function setText(el, v) { el.textContent = (v === undefined || v === null || v === "") ? "—" : v; }
 
-  function renderPanel(p) {
+  function renderDraft(draft, missing) {
+    els.draftKnown.innerHTML = "";
+    Object.keys(FIELD_LABELS).forEach(function (key) {
+      if (draft[key]) {
+        var row = document.createElement("div");
+        var dt = document.createElement("dt"); dt.textContent = FIELD_LABELS[key];
+        var dd = document.createElement("dd"); dd.textContent = draft[key];
+        row.appendChild(dt); row.appendChild(dd);
+        els.draftKnown.appendChild(row);
+      }
+    });
+    els.draftMissing.innerHTML = "";
+    (missing || []).forEach(function (key) {
+      var li = document.createElement("li");
+      li.textContent = FIELD_LABELS[key] || key;
+      els.draftMissing.appendChild(li);
+    });
+    els.rcDraft.classList.remove("hidden");
+  }
+
+  function getJSON(url) {
+    return fetch(url).then(function (r) { return r.ok ? r.json() : null; })
+                     .catch(function () { return null; });
+  }
+
+  function renderPanel(data) {
     els.empty.classList.add("hidden");
     els.result.classList.remove("hidden");
 
-    if (p.lead) {
-      setText(els.lCompany, p.lead.company);
-      setText(els.lContact, p.lead.contact);
-      setText(els.lService, p.lead.service);
-      setText(els.lBudget, p.lead.budget);
-      setText(els.lStatus, p.lead.status || "new");
+    var draft = data.lead_draft || {};
+    var hasDraft = Object.keys(draft).length > 0;
+
+    // Lead: created vs in-progress draft.
+    if (data.lead_created) {
+      setText(els.lCompany, draft.company);
+      setText(els.lContact, draft.contact_email);
+      setText(els.lService, draft.service_interest);
+      setText(els.lBudget, draft.budget_range);
       els.rcLead.classList.remove("hidden");
+      els.rcDraft.classList.add("hidden");
+    } else if (hasDraft) {
+      els.rcLead.classList.add("hidden");
+      renderDraft(draft, data.missing_fields);
     } else {
       els.rcLead.classList.add("hidden");
+      els.rcDraft.classList.add("hidden");
     }
 
-    if (p.ticket) {
-      setText(els.tId, p.ticket.id);
-      setText(els.tReason, p.ticket.reason);
-      setText(els.tPriority, p.ticket.priority);
-      setText(els.tStatus, p.ticket.status);
-      els.rcTicket.classList.remove("hidden");
+    // Ticket (only on a real escalation).
+    if (data.ticket_created && data.ticket_id) {
+      getJSON("/tickets/" + data.ticket_id).then(function (t) {
+        if (!t) { return; }
+        setText(els.tId, "TCK-" + t.id);
+        setText(els.tReason, (t.reason || "").replace(/_/g, " "));
+        setText(els.tPriority, t.priority);
+        setText(els.tStatus, t.status);
+        els.rcTicket.classList.remove("hidden");
+      });
     } else {
       els.rcTicket.classList.add("hidden");
     }
 
-    if (p.headline) {
-      els.headline.textContent = p.headline;
-      els.headline.classList.remove("hidden");
+    // Knowledge sources.
+    if (data.sources && data.sources.length) {
+      setText(els.sources, data.sources.join(", "));
+      els.rcSources.classList.remove("hidden");
     } else {
-      els.headline.classList.add("hidden");
+      els.rcSources.classList.add("hidden");
     }
 
-    els.rows.innerHTML = "";
-    (p.rows || []).forEach(function (pair) {
-      var row = document.createElement("div");
-      var dt = document.createElement("dt"); dt.textContent = pair[0];
-      var dd = document.createElement("dd"); dd.textContent = pair[1];
-      row.appendChild(dt); row.appendChild(dd);
-      els.rows.appendChild(row);
-    });
+    // Memory.
+    els.rcMemory.classList.toggle("hidden", !data.memory_used);
+
+    setText(els.workflow, ACTION_LABEL[data.action] || "Replied");
   }
 
-  /* ---------- backend helpers ---------- */
+  /* ---------- send ---------- */
   function postChat(text) {
     return fetch("/chat", {
       method: "POST",
@@ -238,80 +199,8 @@
       body: JSON.stringify({ session_id: getSessionId(), user_message: text })
     }).then(function (r) { return r.ok ? r.json() : null; });
   }
-  function getJSON(url) {
-    return fetch(url).then(function (r) { return r.ok ? r.json() : null; })
-                     .catch(function () { return null; });
-  }
-  function syncBackend(messages) {
-    var last = Promise.resolve(null);
-    messages.forEach(function (m) {
-      last = last.then(function () { return postChat(m).catch(function () { return null; }); });
-    });
-    return last;
-  }
 
-  /* ---------- scenarios ---------- */
-  function runScenario(key, btn) {
-    if (busy) { return; }
-    var sc = SCENARIOS[key];
-    if (!sc) { return; }
-
-    document.querySelectorAll(".qa").forEach(function (b) { b.classList.remove("active"); });
-    if (btn) { btn.classList.add("active"); }
-
-    resetSession();
-    clearChat();
-    sc.messages.forEach(function (m) { addMessage(m[0], m[1]); });
-    renderPanel(sc.panel);
-
-    if (sc.backend && sc.backend.length) {
-      syncBackend(sc.backend).then(function (resp) {
-        if (key === "human" && resp && resp.created_ticket_id) {
-          els.tId.textContent = "TCK-" + resp.created_ticket_id;
-        }
-      });
-    }
-  }
-
-  /* ---------- free-typed chat (live) ---------- */
-  function livePanel(data) {
-    var sources = (data.sources && data.sources.length) ? data.sources.join(", ") : "Not required";
-
-    if (data.created_lead_id) {
-      getJSON("/crm/leads").then(function (leads) {
-        var lead = null;
-        if (leads) {
-          for (var i = 0; i < leads.length; i++) {
-            if (leads[i].id === data.created_lead_id) { lead = leads[i]; break; }
-          }
-        }
-        renderPanel({
-          lead: lead ? {
-            company: lead.company, contact: lead.contact, service: lead.service_interest,
-            budget: lead.budget_range, status: lead.status
-          } : null,
-          rows: [["Workflow", "Lead qualification"], ["Knowledge", "Not required"], ["Escalated", "No"]]
-        });
-      });
-      return;
-    }
-    if (data.created_ticket_id) {
-      getJSON("/tickets/" + data.created_ticket_id).then(function (t) {
-        renderPanel({
-          ticket: t ? { id: "TCK-" + t.id, reason: (t.reason || "").replace(/_/g, " "),
-                        priority: t.priority, status: t.status } : null,
-          rows: [["Workflow", "Human escalation"], ["Escalated", "Yes"]]
-        });
-      });
-      return;
-    }
-    renderPanel({
-      headline: ACTION_LABEL[data.action_taken] || INTENT_LABEL[data.intent] || "Answered",
-      rows: [["Workflow", INTENT_LABEL[data.intent] || "Answered"], ["Knowledge", sources]]
-    });
-  }
-
-  function sendLive(text) {
+  function send(text) {
     if (!text || busy) { return; }
     busy = true; sendBtn.disabled = true; input.disabled = true;
     addMessage("user", text);
@@ -321,13 +210,23 @@
         typing.remove(); lastRole = null;
         if (!data) { throw new Error("no response"); }
         addMessage("assistant", data.answer || "…");
-        livePanel(data);
+        renderPanel(data);
       })
       .catch(function () {
         typing.remove(); lastRole = null;
         addMessage("assistant", "Sorry — I couldn't reach the backend. Make sure the API is running.");
       })
       .finally(function () { busy = false; sendBtn.disabled = false; input.disabled = false; input.focus(); });
+  }
+
+  function newConversation() {
+    localStorage.setItem(SESSION_KEY, newSessionId());
+    chat.innerHTML = "";
+    if (emptyChat) { chat.appendChild(emptyChat); emptyChat.style.display = ""; }
+    lastRole = null;
+    els.result.classList.add("hidden");
+    els.empty.classList.remove("hidden");
+    document.querySelectorAll(".qa").forEach(function (b) { b.classList.remove("active"); });
   }
 
   /* ---------- wiring ---------- */
@@ -337,14 +236,20 @@
     if (!text) { return; }
     input.value = "";
     document.querySelectorAll(".qa").forEach(function (b) { b.classList.remove("active"); });
-    sendLive(text);
+    send(text);
   });
 
   document.querySelectorAll(".qa").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      runScenario(btn.getAttribute("data-scenario"), btn);
+      var msg = QUICK_MESSAGES[btn.getAttribute("data-scenario")];
+      if (!msg) { return; }
+      document.querySelectorAll(".qa").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      send(msg);
     });
   });
+
+  if (newChatBtn) { newChatBtn.addEventListener("click", newConversation); }
 
   getSessionId();
 })();

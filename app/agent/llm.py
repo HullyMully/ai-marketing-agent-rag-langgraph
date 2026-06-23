@@ -41,19 +41,18 @@ def _mock_complete(prompt: str) -> str:
     """Very small heuristic 'LLM' used only in demo mode."""
     lowered = prompt.lower()
     if "intent:" in lowered and "classify" in lowered:
-        # Intent classification path is normally rule-based in mock mode.
-        return "general_question"
+        # Intent classification is rule-based in mock mode; safe fallback label.
+        return "unknown"
 
     # For RAG answers we surface the retrieved context as the grounded answer.
     marker = "Knowledge base context:"
-    if marker in prompt and "User question:" in prompt:
-        context = prompt.split(marker, 1)[1].split("User question:", 1)[0].strip()
-        snippet = _first_meaningful_lines(context, max_lines=4)
+    if marker in prompt and ("User message:" in prompt or "User question:" in prompt):
+        context = prompt.split(marker, 1)[1].split("User message:", 1)
+        if len(context) == 1:
+            context = prompt.split(marker, 1)[1].split("User question:", 1)
+        snippet = _first_meaningful_lines(context[0].strip(), max_lines=2)
         if snippet:
-            return (
-                f"{snippet}\n\nIf you'd like, I can share more detail or connect "
-                "you with a NovaGrowth specialist."
-            )
+            return snippet
         return (
             "I'm not fully sure about that based on what I have. I can connect "
             "you with a human manager who can help."
@@ -69,13 +68,13 @@ def _mock_complete(prompt: str) -> str:
     return "Thanks for your message! How can I help you with NovaGrowth's services today?"
 
 
-def _first_meaningful_lines(text: str, max_lines: int = 4) -> str:
+def _first_meaningful_lines(text: str, max_lines: int = 2) -> str:
     lines = [
-        ln.strip("# ").strip()
+        ln.strip("# ").strip().lstrip("-* ").strip()
         for ln in text.splitlines()
         if ln.strip() and not ln.strip().startswith(">")
     ]
-    return " ".join(lines[:max_lines])[:600]
+    return " ".join(lines[:max_lines])[:280]
 
 
 _llm: MockLLM | OpenAILLM | None = None
