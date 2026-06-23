@@ -40,7 +40,7 @@ body {
   min-height: 100vh;
   line-height: 1.5;
 }
-a { color: inherit; }
+a { color: inherit; text-decoration: none; }
 
 /* ---------- shared header / nav ---------- */
 .app-header {
@@ -60,7 +60,7 @@ a { color: inherit; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .logo-dot {
   width: 12px; height: 12px; border-radius: 50%;
-  background: var(--teal); box-shadow: 0 0 12px var(--teal);
+  background: var(--teal); box-shadow: 0 0 6px rgba(45,212,191,.45);
 }
 .brand-name { font-weight: 700; font-size: 15.5px; letter-spacing: .2px; }
 .brand-status {
@@ -256,8 +256,8 @@ a { color: inherit; }
 }
 .rcard-head.muted { color: var(--muted); font-size: 11px; letter-spacing: .7px; text-transform: uppercase; font-weight: 600; }
 .rdot { width: 9px; height: 9px; border-radius: 50%; }
-.rdot.green { background: var(--green); box-shadow: 0 0 8px var(--green); }
-.rdot.amber { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+.rdot.green { background: var(--green); }
+.rdot.amber { background: var(--amber); }
 .rcard.lead { border-color: #1f7a52; }
 .rcard.lead .rcard-head { color: #6ee7b7; background: rgba(16,61,54,.45); }
 .rcard.ticket { border-color: #7a5a1f; }
@@ -322,3 +322,15 @@ a { color: inherit; }
 /* scrollbars */
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-thumb { background: #22304d; border-radius: 8px; }
+
+/* ---------- inline line icons ---------- */
+.feature-ic svg, .qa-ic svg, .ec-ic svg {
+  width: 18px; height: 18px; stroke: var(--teal); fill: none;
+  stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+}
+.ec-ic svg { width: 22px; height: 22px; }
+
+/* ---------- landing: architecture summary ---------- */
+.arch-summary { margin-top: 28px; padding: 18px 22px; }
+.arch-summary .section-title { margin-bottom: 8px; }
+.arch-line { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.75; }

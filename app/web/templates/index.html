@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NovaGrowth AI Assistant</title>
-  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/styles.css?v=3">
 </head>
 <body>
   <header class="app-header">
@@ -13,6 +13,7 @@
       <span class="brand-name">NovaGrowth AI Assistant</span>
     </a>
     <nav class="app-nav">
+      <a href="/" class="active">Home</a>
       <a href="/demo">Demo</a>
       <a href="/api-overview">API Overview</a>
       <a href="/metrics">Metrics</a>
@@ -37,35 +38,44 @@
 
     <section class="feature-grid" aria-label="Features">
       <article class="card feature-card">
-        <div class="feature-ic">🧭</div>
+        <div class="feature-ic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
         <h3>LangGraph dialogue flow</h3>
         <p>Stateful graph that classifies intent, retrieves context, decides and acts.</p>
       </article>
       <article class="card feature-card">
-        <div class="feature-ic">📚</div>
+        <div class="feature-ic"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
         <h3>RAG knowledge base</h3>
         <p>Answers grounded in the agency's services, pricing and workflow docs.</p>
       </article>
       <article class="card feature-card">
-        <div class="feature-ic">🗂️</div>
+        <div class="feature-ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="3.2"/><path d="M3 21v-1a5 5 0 0 1 5-5h2"/><path d="M19 8v6M16 11h6"/></svg></div>
         <h3>CRM lead creation</h3>
         <p>Qualifies prospects and creates structured leads for the marketing team.</p>
       </article>
       <article class="card feature-card">
-        <div class="feature-ic">🙋</div>
+        <div class="feature-ic"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>
         <h3>Human escalation</h3>
         <p>Routes complex requests to a manager as a tracked support ticket.</p>
       </article>
       <article class="card feature-card">
-        <div class="feature-ic">✈️</div>
+        <div class="feature-ic"><svg viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9z"/></svg></div>
         <h3>Telegram integration</h3>
         <p>The same agent is reachable through a Telegram bot.</p>
       </article>
       <article class="card feature-card">
-        <div class="feature-ic">📊</div>
+        <div class="feature-ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 13v5M12 9v9M17 5v13"/></svg></div>
         <h3>Demo metrics</h3>
         <p>Conversations, leads, tickets and resolution rates at a glance.</p>
       </article>
+    </section>
+
+    <section class="card arch-summary">
+      <div class="section-title">Architecture</div>
+      <p class="arch-line">
+        Telegram&nbsp;/&nbsp;Web&nbsp;→&nbsp;FastAPI&nbsp;→&nbsp;LangGraph agent&nbsp;→&nbsp;LangChain&nbsp;LLM,
+        Qdrant&nbsp;RAG, CRM &amp; ticket tools&nbsp;→&nbsp;SQLite. Runs offline with a mock
+        LLM and mock embeddings, or against an OpenAI-compatible endpoint.
+      </p>
     </section>
   </main>
 

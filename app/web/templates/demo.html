@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NovaGrowth AI Assistant — Demo</title>
-  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/styles.css?v=3">
 </head>
 <body>
   <header class="app-header">
@@ -15,6 +15,7 @@
     </a>
     <nav class="app-nav">
       <a href="/">Home</a>
+      <a href="/demo" class="active">Demo</a>
       <a href="/api-overview">API Overview</a>
       <a href="/metrics">Metrics</a>
       <a href="/docs">Swagger</a>
@@ -26,11 +27,11 @@
     <aside class="col side card">
       <div class="section-title">Quick actions</div>
       <div class="quick-actions">
-        <button class="qa" data-scenario="lead"><span class="qa-ic">🗂️</span>Lead creation flow</button>
-        <button class="qa" data-scenario="services"><span class="qa-ic">📚</span>Services Q&amp;A</button>
-        <button class="qa" data-scenario="pricing"><span class="qa-ic">💳</span>Pricing from RAG</button>
-        <button class="qa" data-scenario="human"><span class="qa-ic">🙋</span>Human escalation</button>
-        <button class="qa" data-scenario="memory"><span class="qa-ic">🧠</span>Memory follow-up</button>
+        <button class="qa" data-scenario="services"><span class="qa-ic"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>Services Q&amp;A</button>
+        <button class="qa" data-scenario="pricing"><span class="qa-ic"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>Pricing from RAG</button>
+        <button class="qa" data-scenario="lead"><span class="qa-ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="3.2"/><path d="M3 21v-1a5 5 0 0 1 5-5h2"/><path d="M19 8v6M16 11h6"/></svg></span>Lead creation flow</button>
+        <button class="qa" data-scenario="human"><span class="qa-ic"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>Human escalation</button>
+        <button class="qa" data-scenario="memory"><span class="qa-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Memory follow-up</button>
       </div>
       <p class="hint">Run a quick action, or type your own message below.</p>
     </aside>
@@ -46,7 +47,7 @@
 
       <div id="chat" class="chat-window" aria-live="polite">
         <div id="empty-chat" class="empty-chat">
-          <div class="ec-ic">💬</div>
+          <div class="ec-ic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
           <b>Start a conversation</b>
           <p>Pick a quick action on the left, or type a message to the assistant.</p>
         </div>
@@ -73,7 +74,6 @@
       </div>
 
       <div id="result" class="result-stack hidden">
-        <!-- lead -->
         <div id="rc-lead" class="rcard lead hidden">
           <div class="rcard-head"><span class="rdot green"></span>Lead created</div>
           <dl class="rbody">
@@ -85,7 +85,6 @@
           </dl>
         </div>
 
-        <!-- ticket -->
         <div id="rc-ticket" class="rcard ticket hidden">
           <div class="rcard-head"><span class="rdot amber"></span>Ticket created</div>
           <dl class="rbody">
@@ -96,27 +95,15 @@
           </dl>
         </div>
 
-        <!-- current workflow -->
         <div class="rcard">
-          <div class="rcard-head muted">Current workflow</div>
-          <div id="r-workflow" class="rline">—</div>
-        </div>
-
-        <!-- knowledge sources -->
-        <div id="rc-sources" class="rcard">
-          <div class="rcard-head muted">Knowledge sources</div>
-          <div id="r-sources" class="rline">—</div>
-        </div>
-
-        <!-- session memory -->
-        <div id="rc-memory" class="rcard">
-          <div class="rcard-head muted">Session memory</div>
-          <div id="r-memory" class="rline">—</div>
+          <div class="rcard-head muted">Summary</div>
+          <div id="r-headline" class="rline hidden">—</div>
+          <dl id="r-rows" class="rbody"></dl>
         </div>
       </div>
     </aside>
   </main>
 
-  <script src="/static/demo.js" defer></script>
+  <script src="/static/demo.js?v=3" defer></script>
 </body>
 </html>

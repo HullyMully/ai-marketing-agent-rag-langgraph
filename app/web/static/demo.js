@@ -1,10 +1,9 @@
 /* NovaGrowth AI Assistant — web demo client.
    Plain JS, no dependencies.
 
-   Two modes:
-   - Quick-action scenarios render a clean, deterministic, product-quality flow
-     (and quietly call the backend so leads/tickets/metrics stay real).
-   - Free-typed messages call POST /chat live and show a humanised result. */
+   Quick actions render clean, deterministic flows (and quietly call the backend
+   so leads, tickets and metrics stay real). Typing a message runs POST /chat
+   live and shows a humanised result. */
 (function () {
   "use strict";
 
@@ -16,15 +15,14 @@
       messages: [
         ["assistant", "Hi, I'm NovaGrowth AI. I can answer questions, qualify leads and create CRM records for the marketing team."],
         ["user", "Hi, we need help launching paid ads for our SaaS product."],
-        ["assistant", "Sure. I can help qualify the request. What monthly ad budget are you planning, and who should the team contact?"],
+        ["assistant", "Sure. What monthly ad budget are you planning, and who should the team contact?"],
         ["user", "My name is Sam. I work at BrightDesk. Budget is around $5k/month. Contact me at sam@brightdesk.example."],
         ["assistant", "Done. I created a new lead for BrightDesk and routed it to the marketing team. A manager will follow up with Sam at sam@brightdesk.example."]
       ],
       panel: {
-        workflow: "Lead created and routed to the marketing team",
         lead: { company: "BrightDesk", contact: "sam@brightdesk.example",
                 service: "Paid acquisition", budget: "$5k/month", status: "new" },
-        sources: "Not required"
+        rows: [["Workflow", "Lead qualification"], ["Knowledge", "Not required"], ["Escalated", "No"]]
       },
       backend: ["Hi, my name is Sam. I work at BrightDesk. We need help launching paid " +
                 "ads for our SaaS product. Budget is around $5k/month. Contact me at " +
@@ -37,8 +35,8 @@
         ["assistant", "NovaGrowth supports paid acquisition, landing page audits, analytics setup, campaign optimization and reporting workflows."]
       ],
       panel: {
-        workflow: "Answered from knowledge base",
-        sources: "services.md"
+        headline: "Answered from knowledge base",
+        rows: [["Source", "services.md"], ["Workflow", "RAG answer"]]
       },
       backend: ["What services does NovaGrowth provide?"]
     },
@@ -51,8 +49,8 @@
                       "with dedicated strategy and reporting."]
       ],
       panel: {
-        workflow: "Answered from knowledge base",
-        sources: "pricing.md"
+        headline: "Answered from knowledge base",
+        rows: [["Source", "pricing.md"], ["Workflow", "RAG answer"]]
       },
       backend: ["What pricing packages are available?"]
     },
@@ -63,10 +61,9 @@
         ["assistant", "I created an escalation ticket for a human manager. The team will review the request and follow up within one business day."]
       ],
       panel: {
-        workflow: "Escalated to a manager",
-        ticket: { id: "TCK-1024", reason: "Custom enterprise workflow",
+        ticket: { id: "TCK-1024", reason: "Custom enterprise marketing workflow",
                   priority: "medium", status: "open" },
-        sources: "Not required"
+        rows: [["Workflow", "Human escalation"], ["Escalated", "Yes"]]
       },
       backend: ["I need a human manager for a custom enterprise marketing workflow."]
     },
@@ -79,9 +76,8 @@
         ["assistant", "You mentioned BrightDesk. The current request is about paid acquisition with a budget around $5k/month."]
       ],
       panel: {
-        workflow: "Session memory used",
-        memory: "Remembered BrightDesk · paid acquisition · ~$5k/month",
-        sources: "Not required"
+        headline: "Session memory used",
+        rows: [["Company", "BrightDesk"], ["Topic", "Paid acquisition"], ["Budget", "$5k/month"]]
       },
       backend: []
     }
@@ -100,7 +96,7 @@
   };
   var ACTION_LABEL = {
     answered_from_kb: "Answered from knowledge base",
-    created_lead: "Lead created and routed to the marketing team",
+    created_lead: "Lead created",
     escalated_to_human: "Escalated to a manager",
     collect_missing_info: "Collecting a few details"
   };
@@ -116,8 +112,6 @@
     result: document.getElementById("result"),
     rcLead: document.getElementById("rc-lead"),
     rcTicket: document.getElementById("rc-ticket"),
-    rcSources: document.getElementById("rc-sources"),
-    rcMemory: document.getElementById("rc-memory"),
     lCompany: document.getElementById("l-company"),
     lContact: document.getElementById("l-contact"),
     lService: document.getElementById("l-service"),
@@ -127,9 +121,8 @@
     tReason: document.getElementById("t-reason"),
     tPriority: document.getElementById("t-priority"),
     tStatus: document.getElementById("t-status"),
-    workflow: document.getElementById("r-workflow"),
-    sources: document.getElementById("r-sources"),
-    memory: document.getElementById("r-memory")
+    headline: document.getElementById("r-headline"),
+    rows: document.getElementById("r-rows")
   };
 
   var lastRole = null;
@@ -152,7 +145,6 @@
 
   /* ---------- chat rendering ---------- */
   function scrollToBottom() { chat.scrollTop = chat.scrollHeight; }
-
   function hideEmptyChat() { if (emptyChat) { emptyChat.style.display = "none"; } }
 
   function addMessage(role, text) {
@@ -221,15 +213,21 @@
       els.rcTicket.classList.add("hidden");
     }
 
-    setText(els.workflow, p.workflow);
-    setText(els.sources, p.sources || "Not required");
-
-    if (p.memory) {
-      setText(els.memory, p.memory);
-      els.rcMemory.classList.remove("hidden");
+    if (p.headline) {
+      els.headline.textContent = p.headline;
+      els.headline.classList.remove("hidden");
     } else {
-      els.rcMemory.classList.add("hidden");
+      els.headline.classList.add("hidden");
     }
+
+    els.rows.innerHTML = "";
+    (p.rows || []).forEach(function (pair) {
+      var row = document.createElement("div");
+      var dt = document.createElement("dt"); dt.textContent = pair[0];
+      var dd = document.createElement("dd"); dd.textContent = pair[1];
+      row.appendChild(dt); row.appendChild(dd);
+      els.rows.appendChild(row);
+    });
   }
 
   /* ---------- backend helpers ---------- */
@@ -244,9 +242,6 @@
     return fetch(url).then(function (r) { return r.ok ? r.json() : null; })
                      .catch(function () { return null; });
   }
-
-  /* fire scenario messages at the backend so records/metrics stay real;
-     returns the last response (used to pick up a real ticket id). */
   function syncBackend(messages) {
     var last = Promise.resolve(null);
     messages.forEach(function (m) {
@@ -269,7 +264,6 @@
     sc.messages.forEach(function (m) { addMessage(m[0], m[1]); });
     renderPanel(sc.panel);
 
-    // Keep backend records real, but never let it change the clean display.
     if (sc.backend && sc.backend.length) {
       syncBackend(sc.backend).then(function (resp) {
         if (key === "human" && resp && resp.created_ticket_id) {
@@ -281,42 +275,40 @@
 
   /* ---------- free-typed chat (live) ---------- */
   function livePanel(data) {
-    var p = {
-      workflow: ACTION_LABEL[data.action_taken] ||
-                INTENT_LABEL[data.intent] || "Answered",
-      sources: (data.sources && data.sources.length) ? data.sources.join(", ") : "Not required"
-    };
-    renderPanel(p);
+    var sources = (data.sources && data.sources.length) ? data.sources.join(", ") : "Not required";
 
     if (data.created_lead_id) {
       getJSON("/crm/leads").then(function (leads) {
-        if (!leads) { return; }
-        for (var i = 0; i < leads.length; i++) {
-          if (leads[i].id === data.created_lead_id) {
-            renderPanel({
-              workflow: "Lead created and routed to the marketing team",
-              sources: p.sources,
-              lead: {
-                company: leads[i].company, contact: leads[i].contact,
-                service: leads[i].service_interest, budget: leads[i].budget_range,
-                status: leads[i].status
-              }
-            });
-            break;
+        var lead = null;
+        if (leads) {
+          for (var i = 0; i < leads.length; i++) {
+            if (leads[i].id === data.created_lead_id) { lead = leads[i]; break; }
           }
         }
-      });
-    } else if (data.created_ticket_id) {
-      getJSON("/tickets/" + data.created_ticket_id).then(function (t) {
-        if (!t) { return; }
         renderPanel({
-          workflow: "Escalated to a manager",
-          sources: "Not required",
-          ticket: { id: "TCK-" + t.id, reason: (t.reason || "").replace(/_/g, " "),
-                    priority: t.priority, status: t.status }
+          lead: lead ? {
+            company: lead.company, contact: lead.contact, service: lead.service_interest,
+            budget: lead.budget_range, status: lead.status
+          } : null,
+          rows: [["Workflow", "Lead qualification"], ["Knowledge", "Not required"], ["Escalated", "No"]]
         });
       });
+      return;
     }
+    if (data.created_ticket_id) {
+      getJSON("/tickets/" + data.created_ticket_id).then(function (t) {
+        renderPanel({
+          ticket: t ? { id: "TCK-" + t.id, reason: (t.reason || "").replace(/_/g, " "),
+                        priority: t.priority, status: t.status } : null,
+          rows: [["Workflow", "Human escalation"], ["Escalated", "Yes"]]
+        });
+      });
+      return;
+    }
+    renderPanel({
+      headline: ACTION_LABEL[data.action_taken] || INTENT_LABEL[data.intent] || "Answered",
+      rows: [["Workflow", INTENT_LABEL[data.intent] || "Answered"], ["Knowledge", sources]]
+    });
   }
 
   function sendLive(text) {
