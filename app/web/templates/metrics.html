@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaGrowth AI Assistant — Metrics</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="/">
+      <span class="logo-dot" aria-hidden="true"></span>
+      <span class="brand-name">NovaGrowth AI Assistant</span>
+    </a>
+    <nav class="app-nav">
+      <a href="/demo">Demo</a>
+      <a href="/api-overview">API Overview</a>
+      <a href="/metrics" class="active">Metrics</a>
+      <a href="/docs">Swagger</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero" style="padding-bottom:6px">
+      <h1 style="font-size:32px">Demo metrics</h1>
+      <p class="sub">Live counters from <code>/metrics/demo</code>, computed from the demo database.</p>
+    </section>
+
+    <section class="metric-grid">
+      <article class="card metric-card"><div class="mk">Conversations</div><div id="m-convos" class="mv">—</div></article>
+      <article class="card metric-card"><div class="mk">Leads</div><div id="m-leads" class="mv green">—</div></article>
+      <article class="card metric-card"><div class="mk">Tickets</div><div id="m-tickets" class="mv amber">—</div></article>
+      <article class="card metric-card"><div class="mk">Resolved by AI</div><div id="m-resolved" class="mv teal">—</div></article>
+      <article class="card metric-card"><div class="mk">Escalation rate</div><div id="m-escrate" class="mv">—</div></article>
+      <article class="card metric-card"><div class="mk">Avg response time</div><div id="m-rt" class="mv">—</div><div class="mnote">offline mock mode</div></article>
+    </section>
+
+    <p class="metrics-note">Synthetic demo data. Run a few conversations in the
+      <a href="/demo" style="color:var(--teal);text-decoration:none">demo</a> to see the numbers change.</p>
+  </main>
+
+  <footer class="page-foot">
+    Portfolio case study. NovaGrowth is fictional. Demo data is fictional.
+  </footer>
+
+  <script>
+    (function () {
+      function pct(x) { return Math.round((x || 0) * 100) + "%"; }
+      fetch("/metrics/demo").then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (m) {
+          if (!m) { return; }
+          document.getElementById("m-convos").textContent = m.conversations;
+          document.getElementById("m-leads").textContent = m.leads;
+          document.getElementById("m-tickets").textContent = m.tickets;
+          document.getElementById("m-resolved").textContent = pct(m.resolved_by_ai_rate);
+          document.getElementById("m-escrate").textContent = pct(m.escalation_rate);
+          document.getElementById("m-rt").textContent = "~1.2s";
+        })
+        .catch(function () {});
+    })();
+  </script>
+</body>
+</html>

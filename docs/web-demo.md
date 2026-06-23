@@ -1,7 +1,8 @@
 # Web demo
 
-A small browser UI for the agent, served by the same FastAPI app. It's handy for
-trying the flows and for capturing screenshots.
+The FastAPI app serves a small dark-themed UI alongside the API. It shares one
+design system across every page, so the landing, chat, API overview and metrics
+all look like one internal product.
 
 ## Run it
 
@@ -12,39 +13,38 @@ python scripts/ingest_knowledge.py    # index the knowledge base
 uvicorn app.main:app --reload
 ```
 
-Then open:
+## Pages
 
 - `http://localhost:8000/` — landing page
 - `http://localhost:8000/demo` — chat demo
-- `http://localhost:8000/docs` — API docs
-- `http://localhost:8000/metrics/demo` — demo metrics (JSON)
+- `http://localhost:8000/api-overview` — styled API overview (product view of the endpoints)
+- `http://localhost:8000/metrics` — metrics dashboard (reads `/metrics/demo`)
+- `http://localhost:8000/docs` — Swagger (unchanged)
 
-The demo runs against the real `POST /chat` endpoint. The right-hand panel reads
-back the created lead (`GET /crm/leads`), ticket (`GET /tickets/{id}`) and metrics
-(`GET /metrics/demo`), so it shows actual backend data, not placeholders.
+## Chat demo
 
-## Scenarios
+The left sidebar has quick actions. Each one plays a clean, deterministic flow and
+fills the right-hand **Workflow result** panel:
 
-The sidebar buttons each start a fresh session and run a short flow:
-
-- **Services Q&A** — answered from the knowledge base (RAG)
+- **Lead creation flow** — qualifies a prospect and shows the lead card
+- **Services Q&A** — answered from the knowledge base
 - **Pricing from RAG** — pricing answered from the knowledge base
-- **Lead creation flow** — captures a lead and shows the lead card
 - **Human escalation** — opens a ticket and shows the ticket card
-- **Memory follow-up** — two turns; the agent reuses details from the first
+- **Memory follow-up** — the assistant reuses details from earlier in the session
 
-You can also type your own message. **Screenshot mode** (top-right) hides the
-debug-style details and tightens the layout for clean captures.
+Quick actions render a product-quality conversation and also call the backend
+quietly, so leads, tickets and metrics stay real. Typing your own message runs a
+live `POST /chat` and shows the actual answer.
 
 ## Suggested screenshots
 
-Capture at 1440×900 (1600×900 also works):
+Capture at 1440×900:
 
 1. **Landing page** — `/`
-2. **Lead creation flow** — run the scenario, then turn on Screenshot mode
-3. **Escalation flow** — run the scenario; the ticket card is visible
-4. **API docs** — `/docs`
-5. **Demo metrics** — the metrics card, or `/metrics/demo`
+2. **Lead creation flow** — run the quick action in `/demo`
+3. **Escalation flow** — run the quick action in `/demo`
+4. **API overview** — `/api-overview`
+5. **Metrics dashboard** — `/metrics`
 
-Keep tokens and any personal data out of frame. All demo data is fictional and
-uses the `.example` domain.
+All demo data is fictional and uses the `.example` domain. Keep tokens and any
+personal data out of frame.

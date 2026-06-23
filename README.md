@@ -23,9 +23,11 @@ soon...
 Run the API with `uvicorn app.main:app --reload`, then open the local web demo in
 a browser:
 
-- Web demo: <http://localhost:8000/demo>
 - Landing page: <http://localhost:8000/>
-- API docs: <http://localhost:8000/docs>
+- Web demo: <http://localhost:8000/demo>
+- API overview: <http://localhost:8000/api-overview>
+- Metrics dashboard: <http://localhost:8000/metrics>
+- Swagger docs: <http://localhost:8000/docs>
 
 See [docs/web-demo.md](docs/web-demo.md) for details, or
 [docs/demo/demo-walkthrough.md](docs/demo/demo-walkthrough.md) for the full flow.

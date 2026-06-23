@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaGrowth AI Assistant — API Overview</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="/">
+      <span class="logo-dot" aria-hidden="true"></span>
+      <span class="brand-name">NovaGrowth AI Assistant</span>
+    </a>
+    <nav class="app-nav">
+      <a href="/demo">Demo</a>
+      <a href="/api-overview" class="active">API Overview</a>
+      <a href="/metrics">Metrics</a>
+      <a href="/docs">Swagger</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero" style="padding-bottom:6px">
+      <h1 style="font-size:32px">API overview</h1>
+      <p class="sub">The endpoints behind the assistant. Full interactive docs are in
+        <a href="/docs" style="color:var(--teal);text-decoration:none">Swagger</a>.</p>
+    </section>
+
+    <section class="api-grid">
+      <article class="card endpoint">
+        <span class="method post">POST</span>
+        <div class="ep-main"><div class="path">/chat</div><div class="desc">Send a user message to the agent</div></div>
+        <span class="tag">Chat</span>
+      </article>
+      <article class="card endpoint">
+        <span class="method post">POST</span>
+        <div class="ep-main"><div class="path">/crm/leads</div><div class="desc">Create a CRM lead</div></div>
+        <span class="tag">CRM</span>
+      </article>
+      <article class="card endpoint">
+        <span class="method get">GET</span>
+        <div class="ep-main"><div class="path">/crm/leads</div><div class="desc">List created leads</div></div>
+        <span class="tag">CRM</span>
+      </article>
+      <article class="card endpoint">
+        <span class="method post">POST</span>
+        <div class="ep-main"><div class="path">/tickets</div><div class="desc">Create an escalation ticket</div></div>
+        <span class="tag">Tickets</span>
+      </article>
+      <article class="card endpoint">
+        <span class="method get">GET</span>
+        <div class="ep-main"><div class="path">/tickets</div><div class="desc">List tickets</div></div>
+        <span class="tag">Tickets</span>
+      </article>
+      <article class="card endpoint">
+        <span class="method post">POST</span>
+        <div class="ep-main"><div class="path">/knowledge/ingest</div><div class="desc">Ingest the knowledge base</div></div>
+        <span class="tag">Knowledge</span>
+      </article>
+      <article class="card endpoint">
+        <span class="method get">GET</span>
+        <div class="ep-main"><div class="path">/metrics/demo</div><div class="desc">View demo metrics</div></div>
+        <span class="tag">Metrics</span>
+      </article>
+      <article class="card endpoint">
+        <span class="method get">GET</span>
+        <div class="ep-main"><div class="path">/health</div><div class="desc">Health check</div></div>
+        <span class="tag">System</span>
+      </article>
+    </section>
+  </main>
+
+  <footer class="page-foot">
+    Portfolio case study. NovaGrowth is fictional. Demo data is fictional.
+  </footer>
+</body>
+</html>

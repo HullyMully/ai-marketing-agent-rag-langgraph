@@ -75,6 +75,18 @@ def web_demo() -> FileResponse:
     return FileResponse(TEMPLATES_DIR / "demo.html")
 
 
+@app.get("/api-overview", response_class=FileResponse, include_in_schema=False)
+def api_overview_page() -> FileResponse:
+    """Product-style overview of the API endpoints (styled, not Swagger)."""
+    return FileResponse(TEMPLATES_DIR / "api-overview.html")
+
+
+@app.get("/metrics", response_class=FileResponse, include_in_schema=False)
+def metrics_page() -> FileResponse:
+    """Visual metrics dashboard backed by GET /metrics/demo."""
+    return FileResponse(TEMPLATES_DIR / "metrics.html")
+
+
 @app.get("/health", tags=["system"])
 def health() -> dict:
     """Liveness probe."""

@@ -18,9 +18,11 @@ soon...
 Запустите API командой `uvicorn app.main:app --reload` и откройте локальное
 веб-демо в браузере:
 
-- Веб-демо: <http://localhost:8000/demo>
 - Лендинг: <http://localhost:8000/>
-- Документация API: <http://localhost:8000/docs>
+- Веб-демо: <http://localhost:8000/demo>
+- Обзор API: <http://localhost:8000/api-overview>
+- Дашборд метрик: <http://localhost:8000/metrics>
+- Swagger-документация: <http://localhost:8000/docs>
 
 Подробнее – в [docs/web-demo.md](docs/web-demo.md), полный сценарий –
 в [docs/demo/demo-walkthrough.md](docs/demo/demo-walkthrough.md). С агентом также

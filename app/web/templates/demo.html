@@ -3,119 +3,116 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NovaGrowth AI Marketing Agent — Demo</title>
+  <title>NovaGrowth AI Assistant — Demo</title>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
-<body class="demo">
-  <header class="demo-header">
-    <div class="brand">
+<body>
+  <header class="app-header">
+    <a class="brand" href="/">
       <span class="logo-dot" aria-hidden="true"></span>
       <span class="brand-name">NovaGrowth AI Assistant</span>
       <span class="brand-status">online</span>
-    </div>
-    <div class="header-actions">
-      <button id="shot-toggle" class="btn btn-ghost" type="button" aria-pressed="false">
-        Screenshot mode
-      </button>
-      <a class="btn btn-ghost" href="/">Home</a>
-    </div>
+    </a>
+    <nav class="app-nav">
+      <a href="/">Home</a>
+      <a href="/api-overview">API Overview</a>
+      <a href="/metrics">Metrics</a>
+      <a href="/docs">Swagger</a>
+    </nav>
   </header>
 
-  <main class="demo-grid">
-    <!-- Left: scenarios -->
-    <aside class="panel sidebar-left">
-      <h2 class="panel-title">Scenarios</h2>
-      <div class="scenario-list">
-        <button class="scenario" data-scenario="services">Services Q&amp;A</button>
-        <button class="scenario" data-scenario="pricing">Pricing from RAG</button>
-        <button class="scenario" data-scenario="lead">Lead creation flow</button>
-        <button class="scenario" data-scenario="human">Human escalation</button>
-        <button class="scenario" data-scenario="memory">Memory follow-up</button>
+  <main class="demo-main">
+    <!-- Left: quick actions -->
+    <aside class="col side card">
+      <div class="section-title">Quick actions</div>
+      <div class="quick-actions">
+        <button class="qa" data-scenario="lead"><span class="qa-ic">🗂️</span>Lead creation flow</button>
+        <button class="qa" data-scenario="services"><span class="qa-ic">📚</span>Services Q&amp;A</button>
+        <button class="qa" data-scenario="pricing"><span class="qa-ic">💳</span>Pricing from RAG</button>
+        <button class="qa" data-scenario="human"><span class="qa-ic">🙋</span>Human escalation</button>
+        <button class="qa" data-scenario="memory"><span class="qa-ic">🧠</span>Memory follow-up</button>
       </div>
-      <p class="hint">Pick a scenario, or type your own message.</p>
-      <button id="reset" type="button" class="btn btn-ghost btn-block hide-on-shot">
-        Reset conversation
-      </button>
+      <p class="hint">Run a quick action, or type your own message below.</p>
     </aside>
 
     <!-- Center: chat -->
-    <section class="panel chat-area">
+    <section class="col chat card chat-card">
+      <div class="chat-top">
+        <div class="who">
+          <span class="ava" aria-hidden="true">N</span>
+          <div><b>NovaGrowth AI</b><span>online</span></div>
+        </div>
+      </div>
+
       <div id="chat" class="chat-window" aria-live="polite">
-        <div class="msg assistant">
-          <span class="avatar" aria-hidden="true">N</span>
-          <div class="bubble">
-            Hi, I'm the NovaGrowth assistant. I can explain our services and pricing,
-            help you start a project, or connect you with a manager. How can I help?
-          </div>
+        <div id="empty-chat" class="empty-chat">
+          <div class="ec-ic">💬</div>
+          <b>Start a conversation</b>
+          <p>Pick a quick action on the left, or type a message to the assistant.</p>
         </div>
       </div>
 
       <form id="chat-form" class="chat-input" autocomplete="off">
-        <input id="message" type="text" placeholder="Type a message…"
+        <input id="message" type="text" placeholder="Message NovaGrowth AI…"
                aria-label="Message" required>
         <button id="send" type="submit" class="btn btn-primary">Send</button>
       </form>
     </section>
 
-    <!-- Right: demo result -->
-    <aside class="panel sidebar-right">
-      <h2 class="panel-title">Demo result</h2>
+    <!-- Right: workflow result -->
+    <aside class="col result-col card">
+      <div class="section-title">Workflow result</div>
 
       <div id="result-empty" class="result-empty">
-        <p class="empty-lead">Choose a scenario or type a message.</p>
-        <div class="mini-cards">
-          <div class="mini-card"><span class="mini-icon ic-rag"></span>RAG answers</div>
-          <div class="mini-card"><span class="mini-icon ic-crm"></span>CRM actions</div>
-          <div class="mini-card"><span class="mini-icon ic-esc"></span>Human escalation</div>
+        <p>Run a quick action to see the workflow result.</p>
+        <div class="chips">
+          <div class="chip"><span class="sw sw-teal"></span>Answers from knowledge base</div>
+          <div class="chip"><span class="sw sw-green"></span>CRM lead creation</div>
+          <div class="chip"><span class="sw sw-red"></span>Escalation to a manager</div>
         </div>
       </div>
 
-      <div id="result" class="result hidden">
-        <div id="card-lead" class="card card-lead hidden">
-          <div class="card-head"><span class="dot dot-green"></span>Lead created</div>
-          <dl class="card-body">
-            <div><dt>Company</dt><dd id="lead-company">—</dd></div>
-            <div><dt>Contact</dt><dd id="lead-contact">—</dd></div>
-            <div><dt>Service</dt><dd id="lead-service">—</dd></div>
-            <div><dt>Budget</dt><dd id="lead-budget">—</dd></div>
-            <div><dt>Status</dt><dd><span id="lead-status" class="pill pill-green">new</span></dd></div>
+      <div id="result" class="result-stack hidden">
+        <!-- lead -->
+        <div id="rc-lead" class="rcard lead hidden">
+          <div class="rcard-head"><span class="rdot green"></span>Lead created</div>
+          <dl class="rbody">
+            <div><dt>Company</dt><dd id="l-company">—</dd></div>
+            <div><dt>Contact</dt><dd id="l-contact">—</dd></div>
+            <div><dt>Service</dt><dd id="l-service">—</dd></div>
+            <div><dt>Budget</dt><dd id="l-budget">—</dd></div>
+            <div><dt>Status</dt><dd><span id="l-status" class="pill green">new</span></dd></div>
           </dl>
         </div>
 
-        <div id="card-ticket" class="card card-ticket hidden">
-          <div class="card-head"><span class="dot dot-amber"></span>Ticket created</div>
-          <dl class="card-body">
-            <div><dt>Ticket</dt><dd id="ticket-id">—</dd></div>
-            <div><dt>Reason</dt><dd id="ticket-reason">—</dd></div>
-            <div><dt>Priority</dt><dd><span id="ticket-priority" class="pill pill-amber">—</span></dd></div>
-            <div><dt>Status</dt><dd><span id="ticket-status" class="pill">—</span></dd></div>
+        <!-- ticket -->
+        <div id="rc-ticket" class="rcard ticket hidden">
+          <div class="rcard-head"><span class="rdot amber"></span>Ticket created</div>
+          <dl class="rbody">
+            <div><dt>Ticket ID</dt><dd id="t-id">—</dd></div>
+            <div><dt>Reason</dt><dd id="t-reason">—</dd></div>
+            <div><dt>Priority</dt><dd><span id="t-priority" class="pill amber">—</span></dd></div>
+            <div><dt>Status</dt><dd><span id="t-status" class="pill">—</span></dd></div>
           </dl>
         </div>
 
-        <div class="card card-details hide-on-shot">
-          <div class="card-head muted">Details</div>
-          <dl class="card-body">
-            <div><dt>Intent</dt><dd id="d-intent">—</dd></div>
-            <div><dt>Action</dt><dd id="d-action">—</dd></div>
-            <div><dt>Escalated</dt><dd id="d-escalated">—</dd></div>
-            <div><dt>Sources</dt><dd id="d-sources">—</dd></div>
-          </dl>
+        <!-- current workflow -->
+        <div class="rcard">
+          <div class="rcard-head muted">Current workflow</div>
+          <div id="r-workflow" class="rline">—</div>
         </div>
-      </div>
 
-      <div id="card-metrics" class="card card-metrics hidden">
-        <div class="card-head muted">Demo metrics</div>
-        <div class="metric-row">
-          <div class="metric"><span id="m-convos" class="metric-num">—</span><span class="metric-lbl">Conversations</span></div>
-          <div class="metric"><span id="m-leads" class="metric-num">—</span><span class="metric-lbl">Leads</span></div>
-          <div class="metric"><span id="m-tickets" class="metric-num">—</span><span class="metric-lbl">Tickets</span></div>
-          <div class="metric"><span id="m-resolved" class="metric-num">—</span><span class="metric-lbl">Resolved by AI</span></div>
+        <!-- knowledge sources -->
+        <div id="rc-sources" class="rcard">
+          <div class="rcard-head muted">Knowledge sources</div>
+          <div id="r-sources" class="rline">—</div>
         </div>
-      </div>
 
-      <div class="links hide-on-shot">
-        <a class="btn btn-sm" href="/docs">API docs</a>
-        <a class="btn btn-sm" href="/metrics/demo">Metrics JSON</a>
+        <!-- session memory -->
+        <div id="rc-memory" class="rcard">
+          <div class="rcard-head muted">Session memory</div>
+          <div id="r-memory" class="rline">—</div>
+        </div>
       </div>
     </aside>
   </main>
