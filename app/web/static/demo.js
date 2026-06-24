@@ -8,11 +8,21 @@
   var SESSION_KEY = "assistant_demo_session_id";
 
   var INTENT_LABEL = {
+    // planner user_intent vocabulary
     greeting: "Greeting",
+    casual_chat: "Casual chat",
+    ask_services: "Service question",
+    ask_pricing: "Pricing question",
+    ask_process: "Process question",
+    start_project: "Start a project",
+    provide_lead_info: "Lead details",
+    ask_human: "Wants a human",
+    complaint: "Complaint",
+    meta_question: "Meta question",
+    unclear: "Unclear",
+    // legacy intents (still emitted for metrics)
     service_question: "Service question",
     pricing_question: "Pricing question",
-    lead_qualification: "Lead qualification",
-    create_lead: "Lead details provided",
     support_request: "Support request",
     human_escalation: "Human escalation",
     memory_question: "Memory question",
@@ -40,6 +50,30 @@
     exploring: "Exploring options",
     clarifying_direction: "Confirming direction",
     qualification_paused: "Qualification paused"
+  };
+
+  // Planner's recommended action (what it asked the backend to consider).
+  var REC_ACTION_LABEL = {
+    answer_only: "Answer only",
+    update_lead_draft: "Update lead draft",
+    create_lead: "Create lead",
+    create_ticket: "Create ticket",
+    ask_clarifying_question: "Ask a question",
+    pause_qualification: "Pause qualification",
+    retrieve_knowledge: "Retrieve knowledge"
+  };
+
+  // Backend validation reason codes -> human text.
+  var VALIDATION_LABEL = {
+    ok: "Approved",
+    not_applicable: "No action needed",
+    action_not_recommended: "No action recommended",
+    missing_required_fields: "Blocked — missing details",
+    user_has_not_agreed: "Blocked — not confirmed yet",
+    lead_already_exists: "Blocked — lead already exists",
+    not_an_escalation: "Blocked — not an escalation",
+    ticket_already_exists: "Blocked — ticket already exists",
+    planner_error: "Reasoning unavailable"
   };
 
   var chat = document.getElementById("chat");
@@ -73,7 +107,10 @@
     mode: document.getElementById("r-mode"),
     paused: document.getElementById("r-paused"),
     interests: document.getElementById("r-interests"),
-    next: document.getElementById("r-next")
+    next: document.getElementById("r-next"),
+    action: document.getElementById("r-action"),
+    validation: document.getElementById("r-validation"),
+    executed: document.getElementById("r-executed")
   };
 
   var MODE_LABEL = {
@@ -129,7 +166,14 @@
     }
     var bubble = document.createElement("div");
     bubble.className = "bubble";
-    bubble.textContent = text;
+    var textNode = document.createElement("span");
+    textNode.className = "bubble-text";
+    textNode.textContent = text;
+    bubble.appendChild(textNode);
+    var time = document.createElement("span");
+    time.className = "msg-time";
+    time.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    bubble.appendChild(time);
     wrap.appendChild(bubble);
     chat.appendChild(wrap);
     lastRole = role;
@@ -144,7 +188,18 @@
     var lbl = document.createElement("div");
     lbl.className = "msg-label"; lbl.textContent = assistantName;
     var bubble = document.createElement("div");
-    bubble.className = "bubble"; bubble.textContent = "typing…";
+    bubble.className = "bubble typing-bubble";
+    var dots = document.createElement("span");
+    dots.className = "typing-dots";
+    for (var i = 0; i < 3; i += 1) {
+      var dot = document.createElement("i");
+      dots.appendChild(dot);
+    }
+    var label = document.createElement("span");
+    label.className = "typing-label";
+    label.textContent = "typing";
+    bubble.appendChild(dots);
+    bubble.appendChild(label);
     wrap.appendChild(lbl); wrap.appendChild(bubble);
     chat.appendChild(wrap);
     lastRole = "assistant";
@@ -234,8 +289,19 @@
 
     els.rcMemory.classList.toggle("hidden", !data.memory_used);
 
+    // Backend decision: planner recommendation + validation outcome (honest).
+    var rec = data.recommended_action || "answer_only";
+    setText(els.action, REC_ACTION_LABEL[rec] || rec);
+    var v = data.validation || {};
+    var vText = VALIDATION_LABEL[v.reason] || v.reason || "—";
+    setText(els.validation, vText);
+    els.validation.classList.toggle("green", v.allowed === true);
+    els.validation.classList.toggle("amber", v.allowed === false);
+    setText(els.executed, data.action_executed ? "Yes" : "No");
+
     setText(els.workflow, ACTION_LABEL[data.action] || "Replied");
-    setText(els.intent, INTENT_LABEL[data.intent] || data.intent);
+    var shownIntent = data.user_intent || data.intent;
+    setText(els.intent, INTENT_LABEL[shownIntent] || shownIntent);
   }
 
   /* ---------- send ---------- */

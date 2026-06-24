@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Customer Assistant — Admin</title>
+  <link rel="stylesheet" href="/static/styles.css?v=9">
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="/">
+      <span class="logo-dot" aria-hidden="true"></span>
+      <span class="brand-name" id="brand-name">AI Customer Assistant</span>
+      <span class="brand-status">admin</span>
+    </a>
+    <nav class="app-nav">
+      <a href="/demo">Assistant</a>
+      <a href="/admin" class="active">Admin</a>
+      <a href="/api-overview">API Overview</a>
+      <a href="/metrics">Metrics</a>
+      <a href="/docs">Swagger</a>
+    </nav>
+  </header>
+
+  <main class="admin-main">
+    <section class="admin-head">
+      <div>
+        <p class="section-title">Workspace admin</p>
+        <h1>Leads and customer requests</h1>
+      </div>
+      <div class="admin-actions">
+        <button id="admin-refresh" class="btn btn-primary" type="button">Refresh</button>
+        <a class="btn" href="/demo">Open chat</a>
+      </div>
+    </section>
+
+    <section class="admin-kpis" aria-label="Admin metrics">
+      <article class="admin-kpi">
+        <span>Conversations</span>
+        <b id="admin-conversations">—</b>
+      </article>
+      <article class="admin-kpi">
+        <span>Leads</span>
+        <b id="admin-leads">—</b>
+      </article>
+      <article class="admin-kpi">
+        <span>Tickets</span>
+        <b id="admin-tickets">—</b>
+      </article>
+      <article class="admin-kpi">
+        <span>AI resolved</span>
+        <b id="admin-resolved">—</b>
+      </article>
+    </section>
+
+    <section class="admin-grid">
+      <div class="admin-panel leads-panel">
+        <div class="admin-panel-head">
+          <div>
+            <p class="section-title">CRM</p>
+            <h2>Leads</h2>
+          </div>
+          <input id="lead-filter" class="admin-search" type="search" placeholder="Search leads">
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Company</th>
+                <th>Interest</th>
+                <th>Budget</th>
+                <th>Status</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody id="leads-body">
+              <tr><td colspan="6" class="admin-empty">Loading leads…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <aside class="admin-panel side-panel">
+        <div class="admin-panel-head">
+          <div>
+            <p class="section-title">Support</p>
+            <h2>Tickets</h2>
+          </div>
+        </div>
+        <div id="tickets-list" class="ticket-list">
+          <div class="admin-empty">Loading tickets…</div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="/static/admin.js?v=1" defer></script>
+</body>
+</html>

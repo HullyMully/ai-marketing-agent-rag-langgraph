@@ -53,6 +53,14 @@ def test_metrics_page_ok(client: TestClient) -> None:
     assert "Local workspace metrics" in resp.text
 
 
+def test_admin_page_ok(client: TestClient) -> None:
+    resp = client.get("/admin")
+    assert resp.status_code == 200
+    assert "text/html" in resp.headers["content-type"]
+    assert "Leads and customer requests" in resp.text
+    assert "/static/admin.js" in resp.text
+
+
 def test_static_css_loads(client: TestClient) -> None:
     resp = client.get("/static/styles.css")
     assert resp.status_code == 200
@@ -61,5 +69,11 @@ def test_static_css_loads(client: TestClient) -> None:
 
 def test_static_js_loads(client: TestClient) -> None:
     resp = client.get("/static/demo.js")
+    assert resp.status_code == 200
+    assert "javascript" in resp.headers["content-type"]
+
+
+def test_static_admin_js_loads(client: TestClient) -> None:
+    resp = client.get("/static/admin.js")
     assert resp.status_code == 200
     assert "javascript" in resp.headers["content-type"]

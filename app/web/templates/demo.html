@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Customer Assistant — Chat</title>
-  <link rel="stylesheet" href="/static/styles.css?v=6">
+  <link rel="stylesheet" href="/static/styles.css?v=9">
 </head>
 <body>
   <header class="app-header">
@@ -16,6 +16,7 @@
     <nav class="app-nav">
       <a href="/">Home</a>
       <a href="/demo" class="active">Assistant</a>
+      <a href="/admin">Admin</a>
       <a href="/api-overview">API Overview</a>
       <a href="/metrics">Metrics</a>
       <a href="/docs">Swagger</a>
@@ -39,11 +40,14 @@
     </aside>
 
     <!-- Center: chat -->
-    <section class="col chat card chat-card">
+    <section class="col chat chat-card">
       <div class="chat-top">
         <div class="who">
           <span class="ava" aria-hidden="true" id="ava-initial">A</span>
-          <div><b id="assistant-name">AI Assistant</b><span>online</span></div>
+          <div><b id="assistant-name">AI Assistant</b><span class="presence">online</span></div>
+        </div>
+        <div class="chat-actions" aria-hidden="true">
+          <span></span><span></span><span></span>
         </div>
       </div>
 
@@ -58,7 +62,9 @@
       <form id="chat-form" class="chat-input" autocomplete="off">
         <input id="message" type="text" placeholder="Type a message…"
                aria-label="Message" required>
-        <button id="send" type="submit" class="btn btn-primary">Send</button>
+        <button id="send" type="submit" class="send-fab" aria-label="Send message">
+          <span aria-hidden="true"></span>
+        </button>
       </form>
     </section>
 
@@ -135,6 +141,17 @@
           <div class="rline">Used to answer from earlier details.</div>
         </div>
 
+        <!-- backend decision (planner recommendation + validation) -->
+        <div class="rcard">
+          <div class="rcard-head muted">Backend decision</div>
+          <div class="block-label">Recommended action</div>
+          <div class="rline"><span id="r-action" class="pill">—</span></div>
+          <div class="block-label">Validation</div>
+          <div class="rline"><span id="r-validation" class="pill">—</span></div>
+          <div class="block-label">Action executed</div>
+          <div id="r-executed" class="rline">—</div>
+        </div>
+
         <!-- current workflow -->
         <div class="rcard">
           <div class="rcard-head muted">Workflow</div>
@@ -148,6 +165,6 @@
     </aside>
   </main>
 
-  <script src="/static/demo.js?v=6" defer></script>
+  <script src="/static/demo.js?v=9" defer></script>
 </body>
 </html>

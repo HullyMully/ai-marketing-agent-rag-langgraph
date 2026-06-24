@@ -90,6 +90,12 @@ def metrics_page() -> FileResponse:
     return FileResponse(TEMPLATES_DIR / "metrics.html")
 
 
+@app.get("/admin", response_class=FileResponse, include_in_schema=False)
+def admin_page() -> FileResponse:
+    """Admin panel for persisted leads, tickets and workspace metrics."""
+    return FileResponse(TEMPLATES_DIR / "admin.html")
+
+
 @app.get("/config", tags=["system"])
 def public_config() -> dict:
     """Public, non-secret business profile used by the web UI."""
