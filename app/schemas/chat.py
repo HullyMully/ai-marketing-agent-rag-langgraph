@@ -28,6 +28,13 @@ class ChatResponse(BaseModel):
     lead_created: bool = False
     lead_id: int | None = None
 
+    # Dialogue policy / mode
+    mode: str = "answering"  # answering / exploring / qualifying / paused
+    known_interests: list[str] = Field(default_factory=list)
+    qualification_paused: bool = False
+    exploration_mode: bool = False
+    next_step: str = ""
+
     # Escalation
     ticket_created: bool = False
     ticket_id: int | None = None
@@ -35,6 +42,7 @@ class ChatResponse(BaseModel):
     # Knowledge / memory
     sources: list[str] = Field(default_factory=list)
     memory_used: bool = False
+    clarification_count: int = 0
 
     # Telemetry (kept for compatibility)
     escalated: bool = False

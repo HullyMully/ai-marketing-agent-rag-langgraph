@@ -23,12 +23,25 @@ class AgentState(TypedDict, total=False):
     # --- routing ---
     route: str
 
-    # --- extraction / lead draft ---
+    # --- understanding / lead draft ---
     extracted: dict[str, Any]
+    saved_fields: list[str]
+    user_confusion: bool
+    correction_detected: bool
+    asks_for_human: bool
+    clarification_count: int
     lead_draft: dict[str, Any]
     missing_fields: list[str]
     lead_created: bool
     lead_id: int | None
+
+    # --- dialogue policy ---
+    mode: str                      # answering / exploring / qualifying / paused
+    exploration_mode: bool
+    qualification_paused: bool
+    known_interests: list[str]
+    next_step: str
+    dialogue_state: dict[str, Any]
 
     # --- retrieval ---
     retrieved: list[str]

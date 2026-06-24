@@ -27,7 +27,7 @@ def test_saas_ads_sets_service_and_asks_company_budget(client: TestClient) -> No
     sid = _sid("ads")
     _chat(client, sid, "Hello I am a new customer")
     data = _chat(client, sid, "I need help with SaaS ads")
-    assert data["lead_draft"].get("service_interest") == "Paid acquisition"
+    assert "paid" in (data["lead_draft"].get("service_interest", "").lower())
     assert data["lead_created"] is False
     assert "company" in data["missing_fields"]
     assert "budget_range" in data["missing_fields"]

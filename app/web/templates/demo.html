@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Customer Assistant — Chat</title>
-  <link rel="stylesheet" href="/static/styles.css?v=5">
+  <link rel="stylesheet" href="/static/styles.css?v=6">
 </head>
 <body>
   <header class="app-header">
@@ -76,6 +76,19 @@
       </div>
 
       <div id="result" class="result-stack hidden">
+        <!-- dialogue mode -->
+        <div id="rc-mode" class="rcard">
+          <div class="rcard-head muted">Mode</div>
+          <div class="rline">
+            <span id="r-mode" class="pill">—</span>
+            <span id="r-paused" class="pill amber hidden">qualification paused</span>
+          </div>
+          <div class="block-label">Known interests</div>
+          <div id="r-interests" class="rline">—</div>
+          <div class="block-label">Next suggested step</div>
+          <div id="r-next" class="rline">—</div>
+        </div>
+
         <!-- lead created -->
         <div id="rc-lead" class="rcard lead hidden">
           <div class="rcard-head"><span class="rdot green"></span>Lead created</div>
@@ -135,6 +148,6 @@
     </aside>
   </main>
 
-  <script src="/static/demo.js?v=5" defer></script>
+  <script src="/static/demo.js?v=6" defer></script>
 </body>
 </html>

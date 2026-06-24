@@ -19,6 +19,18 @@ All notable changes to this project are documented here. Format loosely follows
 - `docs/company-configuration.md` (+ RU) describing how to configure a real
   company, replace the knowledge base and run ingestion.
 - `scripts/test_production_flow.py` manual end-to-end check against a local server.
+- Natural-dialogue policy with per-session dialogue state (greeting / refusal /
+  confusion / frustration counters, `exploration_mode`, `qualification_paused`).
+  The assistant now answers social greetings, jokes, confusion and frustration,
+  never repeats the same qualification question more than twice, and switches to
+  an exploration mode (general guidance, no company/budget/email) when the user
+  can't or won't share details — pausing qualification after repeated refusal.
+- Conversation **mode** (answering / exploring / qualifying / paused), known
+  interests and a suggested next step are returned by `/chat` and shown in the
+  web "Conversation state" panel; a lead draft is only shown while qualifying.
+- Service interest now combines additively ("and SEO" → "Paid ads + SEO"), and a
+  lead is created only when the user clearly wants to proceed and all fields are
+  known.
 
 ## [0.1.0] – 2026-06-22
 ### Added

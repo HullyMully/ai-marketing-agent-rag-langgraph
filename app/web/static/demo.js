@@ -24,7 +24,8 @@
     company: "Company",
     contact_email: "Contact email",
     service_interest: "Service",
-    budget_range: "Budget"
+    budget_range: "Budget",
+    product_type: "Product"
   };
 
   var ACTION_LABEL = {
@@ -34,7 +35,11 @@
     answered_from_kb: "Answered from knowledge base",
     escalated_to_human: "Escalated to a human",
     answered_with_memory: "Used session memory",
-    asked_clarification: "Asked for clarification"
+    asked_clarification: "Asked for clarification",
+    greeted: "Greeted the user",
+    exploring: "Exploring options",
+    clarifying_direction: "Confirming direction",
+    qualification_paused: "Qualification paused"
   };
 
   var chat = document.getElementById("chat");
@@ -64,7 +69,18 @@
     tStatus: document.getElementById("t-status"),
     sources: document.getElementById("r-sources"),
     workflow: document.getElementById("r-workflow"),
-    intent: document.getElementById("r-intent")
+    intent: document.getElementById("r-intent"),
+    mode: document.getElementById("r-mode"),
+    paused: document.getElementById("r-paused"),
+    interests: document.getElementById("r-interests"),
+    next: document.getElementById("r-next")
+  };
+
+  var MODE_LABEL = {
+    answering: "Answering",
+    exploring: "Exploring options",
+    qualifying: "Qualifying lead",
+    paused: "Paused"
   };
 
   var lastRole = null;
@@ -170,6 +186,14 @@
 
     var draft = data.lead_draft || {};
     var hasDraft = Object.keys(draft).length > 0;
+    var mode = data.mode || "answering";
+
+    // Dialogue mode summary.
+    setText(els.mode, MODE_LABEL[mode] || mode);
+    els.paused.classList.toggle("hidden", !data.qualification_paused);
+    var interests = (data.known_interests || []).join(", ");
+    setText(els.interests, interests);
+    setText(els.next, data.next_step);
 
     if (data.lead_created) {
       setText(els.lCompany, draft.company);
@@ -178,7 +202,9 @@
       setText(els.lBudget, draft.budget_range);
       els.rcLead.classList.remove("hidden");
       els.rcDraft.classList.add("hidden");
-    } else if (hasDraft) {
+    } else if (hasDraft && mode === "qualifying") {
+      // Only show a "lead draft" while we're actually qualifying — never imply
+      // the user is a lead during an exploratory chat.
       els.rcLead.classList.add("hidden");
       renderDraft(draft, data.missing_fields);
     } else {

@@ -1,21 +1,21 @@
-"""Session-based conversation memory and a lead-qualification draft.
+"""Session memory: conversation history + a persistent lead draft.
 
-Message history is persisted to SQLite (so it survives restarts and feeds the
-demo metrics). The per-session **lead draft** — the fields gathered while
-qualifying a prospect — is kept in a lightweight in-process store keyed by
-session id, behind a clear interface so the backend could be swapped later.
+The lead draft is the structured dialogue state gathered while qualifying a
+prospect. It survives across messages in the same session (kept in-process,
+behind a clear interface). History is persisted to SQLite for metrics.
 """
 from __future__ import annotations
-
-import re
 
 from app.db.database import session_scope
 from app.db.repositories import MessageRepository
 
-# Fields a lead draft can hold. A CRM lead is only created once the required
-# ones are all known (budget may be explicitly marked unknown).
-LEAD_FIELDS = ["name", "company", "contact_email", "service_interest", "budget_range"]
+# Required for a CRM lead. Budget may instead be explicitly marked unknown.
 REQUIRED_FIELDS = ["name", "company", "contact_email", "service_interest", "budget_range"]
+# Fields shown in the UI lead draft (includes optional ones).
+DISPLAY_FIELDS = [
+    "name", "company", "contact_email", "service_interest", "budget_range",
+    "product_type",
+]
 
 
 def _empty_draft() -> dict:
@@ -23,55 +23,36 @@ def _empty_draft() -> dict:
         "name": "",
         "company": "",
         "contact_email": "",
+        "phone": "",
         "service_interest": "",
         "budget_range": "",
+        "product_type": "",
         "notes": "",
         "budget_unknown": False,
         "lead_created": False,
         "lead_id": None,
+        # --- dialogue state ---
+        "last_asked": [],        # fields the assistant most recently asked for
+        "clarify_count": 0,      # consecutive truly-unclear messages
+        "greeting_count": 0,     # how many social greetings the user sent
+        "repeated_question_count": 0,  # times the current question type repeated
+        "last_question_type": "",      # type of the last question we asked
+        "user_refused_count": 0,       # "no", "not now", "later"...
+        "user_confusion_count": 0,     # "I don't remember", "idk"...
+        "user_frustration_count": 0,   # ALL CAPS refusal, "stop asking"...
+        "qualification_paused": False, # stop asking for lead details
+        "exploration_mode": False,     # help the user think, don't qualify
+        "qualification_active": False, # the user wants to start a request
+        "last_assistant_summary": "",  # short summary of our previous reply
     }
 
 
-# In-process draft store: {session_id: draft}.
 _DRAFT_STORE: dict[str, dict] = {}
 
-_EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
-_NAME_RE = re.compile(r"\b(?i:my name is|i am|i'm|this is|name is)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)")
-_BARE_NAME_RE = re.compile(r"^\s*([A-Z][a-z]{1,20})\b")
-_COMPANY_RE = re.compile(
-    r"\b(?i:company is|company:|work at|i'm from|i am from|i'm with|i am with|"
-    r"here at|we are|we're|from)\s+"
-    r"([A-Z][A-Za-z0-9&]+(?:\s+[A-Z][A-Za-z0-9&]+){0,3})"
+_FIELD_KEYS = (
+    "name", "company", "contact_email", "phone", "service_interest",
+    "budget_range", "product_type", "notes",
 )
-# Bare company name when the user answers a "company + budget" prompt tersely,
-# e.g. "BrightDesk, around $5k/month". Anchored to a leading capitalised token
-# immediately followed by a comma to avoid false positives.
-_BARE_COMPANY_RE = re.compile(r"^\s*([A-Z][A-Za-z0-9&]{1,30}),")
-_BUDGET_RE = re.compile(
-    r"\$\s?[\d,]+\s?[km]?(?:\s?/?\s?(?:per month|a month|months|month|mo))?",
-    re.IGNORECASE,
-)
-_BUDGET_UNKNOWN_RE = re.compile(
-    r"(?i)\b(?:no budget|budget is unknown|not sure (?:about|of)?\s*(?:the|my)?\s*budget|"
-    r"don'?t have a budget|budget tbd|no set budget|unsure (?:about|of) budget)\b"
-)
-
-# Words that should never be mistaken for a first name in the bare-name path.
-_NOT_NAMES = {
-    "hi", "hello", "hey", "company", "budget", "my", "the", "contact", "email",
-    "we", "our", "i", "yes", "no", "ok", "okay", "thanks", "sure", "paid", "seo",
-}
-
-_SERVICE_KEYWORDS = {
-    "Paid acquisition": ["paid ads", "paid acquisition", "ppc", "google ads", "meta ads", "ads", "advertising"],
-    "Landing page audit": ["landing page", "landing-page", "page audit"],
-    "Analytics setup": ["analytics", "tracking setup", "ga4", "conversion tracking"],
-    "Campaign optimization": ["campaign optimization", "optimize campaign", "optimisation", "optimization"],
-    "SEO": ["seo", "search engine", "organic ranking"],
-    "Content marketing": ["content marketing", "blog", "articles"],
-    "Email marketing": ["email marketing", "newsletter", "lifecycle"],
-    "Social media": ["social media", "instagram", "tiktok"],
-}
 
 
 class ConversationMemory:
@@ -103,19 +84,34 @@ class ConversationMemory:
     def get_draft(self, session_id: str) -> dict:
         return dict(_DRAFT_STORE.get(session_id, _empty_draft()))
 
-    def update_draft(self, session_id: str, values: dict) -> dict:
+    def update_draft(self, session_id: str, values: dict) -> tuple[dict, list[str]]:
+        """Merge values into the draft. Returns (draft, newly_saved_field_keys)."""
         draft = _DRAFT_STORE.setdefault(session_id, _empty_draft())
+        newly_saved: list[str] = []
         for key, value in values.items():
             if key == "budget_unknown":
                 if value:
                     draft["budget_unknown"] = True
-            elif value:
+                continue
+            if key in _FIELD_KEYS and value:
+                if draft.get(key) != value:
+                    newly_saved.append(key)
                 draft[key] = value
-        return dict(draft)
+        return dict(draft), newly_saved
+
+    def set_last_asked(self, session_id: str, fields: list[str]) -> None:
+        _DRAFT_STORE.setdefault(session_id, _empty_draft())["last_asked"] = list(fields)
+
+    def get_last_asked(self, session_id: str) -> list[str]:
+        return list(self.get_draft(session_id).get("last_asked", []))
 
     def known_fields(self, session_id: str) -> dict[str, str]:
         draft = self.get_draft(session_id)
-        return {k: draft[k] for k in LEAD_FIELDS if draft.get(k)}
+        return {k: draft[k] for k in DISPLAY_FIELDS if draft.get(k)}
+
+    def has_any_field(self, session_id: str) -> bool:
+        draft = self.get_draft(session_id)
+        return any(draft.get(k) for k in _FIELD_KEYS)
 
     def missing_fields(self, session_id: str) -> list[str]:
         draft = self.get_draft(session_id)
@@ -142,51 +138,63 @@ class ConversationMemory:
     def reset_draft(self, session_id: str) -> None:
         _DRAFT_STORE.pop(session_id, None)
 
+    # --- clarification attempts --------------------------------------------
+    def clarify_count(self, session_id: str) -> int:
+        return int(self.get_draft(session_id).get("clarify_count", 0))
 
-def extract_fields(message: str) -> dict:
-    """Best-effort extraction of lead fields from one message."""
-    found: dict = {}
+    def bump_clarify(self, session_id: str) -> int:
+        draft = _DRAFT_STORE.setdefault(session_id, _empty_draft())
+        draft["clarify_count"] = int(draft.get("clarify_count", 0)) + 1
+        return draft["clarify_count"]
 
-    email = _EMAIL_RE.search(message)
-    if email:
-        found["contact_email"] = email.group(0)
+    def reset_clarify(self, session_id: str) -> None:
+        if session_id in _DRAFT_STORE:
+            _DRAFT_STORE[session_id]["clarify_count"] = 0
 
-    name = _NAME_RE.search(message)
-    if name:
-        found["name"] = name.group(1).strip()
-    elif email:
-        # "Sam, sam@brightdesk.example" — accept a leading capitalised word.
-        bare = _BARE_NAME_RE.match(message)
-        if bare and bare.group(1).lower() not in _NOT_NAMES:
-            found["name"] = bare.group(1)
+    # --- dialogue state -----------------------------------------------------
+    def _live(self, session_id: str) -> dict:
+        return _DRAFT_STORE.setdefault(session_id, _empty_draft())
 
-    if _BUDGET_UNKNOWN_RE.search(message):
-        found["budget_unknown"] = True
-    else:
-        budget = _BUDGET_RE.search(message)
-        if budget:
-            found["budget_range"] = budget.group(0).strip()
+    def get(self, session_id: str, key: str, default=None):
+        return self.get_draft(session_id).get(key, default)
 
-    company = _COMPANY_RE.search(message)
-    if company:
-        found["company"] = company.group(1).strip().rstrip(".")
-    elif not email and (found.get("budget_range") or found.get("budget_unknown")):
-        # Terse reply to a company+budget prompt, e.g. "BrightDesk, around $5k/month".
-        bare_company = _BARE_COMPANY_RE.match(message)
-        if bare_company and bare_company.group(1).lower() not in _NOT_NAMES:
-            found["company"] = bare_company.group(1)
+    def bump(self, session_id: str, key: str) -> int:
+        draft = self._live(session_id)
+        draft[key] = int(draft.get(key, 0)) + 1
+        return draft[key]
 
-    lowered = message.lower()
-    for service, keywords in _SERVICE_KEYWORDS.items():
-        if any(k in lowered for k in keywords):
-            found["service_interest"] = service
-            break
+    def set_flag(self, session_id: str, key: str, value) -> None:
+        self._live(session_id)[key] = value
 
-    return found
+    def dialogue_state(self, session_id: str) -> dict:
+        """Public snapshot of the dialogue-tracking counters/flags."""
+        d = self.get_draft(session_id)
+        keys = (
+            "greeting_count", "repeated_question_count", "last_question_type",
+            "user_refused_count", "user_confusion_count", "user_frustration_count",
+            "qualification_paused", "exploration_mode", "qualification_active",
+            "last_assistant_summary",
+        )
+        return {k: d.get(k) for k in keys}
 
+    def note_question(self, session_id: str, qtype: str) -> int:
+        """Record that we asked a question of `qtype`. Returns how many times in a
+        row this same question type has now been asked (1 = first time)."""
+        draft = self._live(session_id)
+        if qtype and draft.get("last_question_type") == qtype:
+            draft["repeated_question_count"] = int(draft.get("repeated_question_count", 0)) + 1
+        else:
+            draft["repeated_question_count"] = 1
+        draft["last_question_type"] = qtype
+        return draft["repeated_question_count"]
 
-# Backwards-compatible alias (older imports).
-extract_slots = extract_fields
+    def times_asked(self, session_id: str, qtype: str) -> int:
+        """How many consecutive times `qtype` has been asked already (0 if a
+        different question was asked last)."""
+        draft = self.get_draft(session_id)
+        if draft.get("last_question_type") != qtype:
+            return 0
+        return int(draft.get("repeated_question_count", 0))
 
 
 _memory: ConversationMemory | None = None

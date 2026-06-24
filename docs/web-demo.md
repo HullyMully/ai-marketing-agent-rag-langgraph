@@ -25,8 +25,11 @@ uvicorn app.main:app --reload
 
 ## Chat demo
 
-Every reply comes from the real agent (`POST /chat`). The quick-action buttons
-just send a realistic first message — you continue the conversation by typing.
+Every reply comes from the real assistant (`POST /chat`). The suggested-prompt
+buttons just send a normal first message — you continue by typing. The assistant
+handles **multi-turn lead qualification** with **session memory**: it remembers
+what you've said, asks only for missing fields, handles corrections, and creates a
+lead only once name, company, email, service and budget are known.
 
 - **Services Q&A** / **Pricing from RAG** — answered from the knowledge base
 - **Lead creation flow** — starts a multi-step qualification; reply with company,

@@ -64,6 +64,10 @@ You can also talk to the agent through the Telegram bot.
 - Telegram bot integration
 - CRM-style lead creation and escalation tickets
 - Session memory and stateful dialogue
+- Multi-turn lead qualification (asks only for missing fields, handles corrections)
+- Natural dialogue policy: handles greetings, jokes, confusion and frustration,
+  never repeats the same question twice, and switches to an exploration mode
+  (general guidance, no lead details) — qualification stays optional
 
 It runs end to end with no API keys (mock LLM and embeddings), or against a real
 OpenAI-compatible endpoint (OpenAI, DeepSeek, etc.) when configured.
