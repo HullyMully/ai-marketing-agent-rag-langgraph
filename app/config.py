@@ -1,8 +1,9 @@
 """Central application configuration.
 
 All settings are loaded from environment variables (see `.env.example`).
-The defaults are chosen so the project runs end-to-end in a fully offline
-"demo mode" (MOCK_LLM + mock embeddings) with no paid API keys.
+The application is LLM-first by default: product chat should call the
+configured OpenAI-compatible model. `MOCK_LLM=true` remains available for
+tests and explicit offline demos only.
 """
 from __future__ import annotations
 
@@ -22,10 +23,14 @@ class Settings(BaseSettings):
     )
 
     # --- LLM ---
-    mock_llm: bool = True
+    # Works with any OpenAI-compatible endpoint. For DeepSeek, set
+    # OPENAI_BASE_URL=https://api.deepseek.com and LLM_MODEL=deepseek-chat.
+    mock_llm: bool = False
     openai_api_key: str = "sk-not-set"
     openai_base_url: str = "https://api.openai.com/v1"
     llm_model: str = "gpt-4o-mini"
+    llm_temperature: float = 0.3
+    llm_timeout: int = 30  # seconds per request
     embedding_model: str = "text-embedding-3-small"
 
     # --- Vector store ---

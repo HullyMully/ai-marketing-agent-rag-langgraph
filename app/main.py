@@ -16,6 +16,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api import chat, crm, knowledge, metrics, tickets
+from app.agent.llm import llm_runtime_mode
 from app.company import get_company
 from app.config import settings
 from app.db.database import init_db
@@ -98,4 +99,8 @@ def public_config() -> dict:
 @app.get("/health", tags=["system"])
 def health() -> dict:
     """Liveness probe."""
-    return {"status": "ok", "mock_llm": settings.mock_llm}
+    return {
+        "status": "ok",
+        "mock_llm": settings.mock_llm,
+        "llm_runtime_mode": llm_runtime_mode(),
+    }

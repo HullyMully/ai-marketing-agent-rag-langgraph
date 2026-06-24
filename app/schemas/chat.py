@@ -22,6 +22,15 @@ class ChatResponse(BaseModel):
     intent: str
     action: str | None = None
 
+    # LLM planner metadata
+    assistant_reply: str = ""
+    conversation_target: str = "unclear"
+    context_relation: str = "unclear"
+    should_continue_qualification: bool = False
+    user_intent: str = "unclear"
+    recommended_action: str = "answer_only"
+    knowledge_used: bool = False
+
     # Lead qualification
     lead_draft: dict[str, Any] = Field(default_factory=dict)
     missing_fields: list[str] = Field(default_factory=list)
@@ -44,6 +53,13 @@ class ChatResponse(BaseModel):
     memory_used: bool = False
     clarification_count: int = 0
 
+    # Planner / backend-validation transparency
+    planner_decision: dict[str, Any] = Field(default_factory=dict)
+    validation: dict[str, Any] = Field(default_factory=dict)
+    action_executed: bool = False
+
     # Telemetry (kept for compatibility)
     escalated: bool = False
     confidence: float = 1.0
+    llm_runtime_mode: str = "llm"
+    mock_llm: bool = False

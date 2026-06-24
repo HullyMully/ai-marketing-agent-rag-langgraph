@@ -115,9 +115,9 @@ curl -X POST http://localhost:8000/knowledge/ingest
 
 ## Подключение LLM-провайдера
 
-По умолчанию проект работает в офлайн-моке (`MOCK_LLM=true`) без API-ключа. Чтобы
-использовать реального OpenAI-совместимого провайдера (OpenAI, DeepSeek и т. д.),
-задайте в `.env`:
+По умолчанию проект работает через реальную LLM (`MOCK_LLM=false`). Чтобы
+использовать OpenAI-совместимого провайдера (OpenAI, DeepSeek и т. д.), задайте
+в `.env`:
 
 ```env
 MOCK_LLM=false

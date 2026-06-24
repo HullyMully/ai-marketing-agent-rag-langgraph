@@ -26,18 +26,34 @@ uvicorn app.main:app --reload
 ## Chat demo
 
 Every reply comes from the real assistant (`POST /chat`). The suggested-prompt
-buttons just send a normal first message — you continue by typing. The assistant
-handles **multi-turn lead qualification** with **session memory**: it remembers
-what you've said, asks only for missing fields, handles corrections, and creates a
-lead only once name, company, email, service and budget are known.
+buttons just send a normal message — there are no scripted answers; you continue
+by typing. Each turn is decided by the **LLM planner**, which reads the company
+profile, relevant knowledge, recent history, session memory, the lead draft and
+ticket state, then returns a structured decision. The **backend validates** that
+decision before creating anything, so the assistant qualifies leads naturally,
+handles greetings, jokes, confusion and frustration, and never forces a script.
 
 - **Services Q&A** / **Pricing from RAG** — answered from the knowledge base
-- **Lead creation flow** — starts a multi-step qualification; reply with company,
-  budget, name and email and the agent creates a CRM lead once it has them all
-- **Human escalation** — opens a ticket for a manager
-- **Memory follow-up** — the agent recalls details collected earlier in the session
+- **Lead creation flow** — the planner collects details across turns; the backend
+  creates a CRM lead only once name, company, email, service and budget are known
+- **Human escalation** — opens a ticket for a manager when escalation is justified
+- **Memory follow-up** — the assistant recalls details collected earlier
 
-The right-hand **Workflow result** panel shows the live session state: the lead
-draft with its known and missing fields, a created lead or ticket, any knowledge
-sources used, and whether session memory was used. A lead is shown as *created*
-only once company, service, budget, name and email are all known.
+The right-hand **Conversation state** panel shows the live planner output: the
+current **mode** (answering / exploring / qualifying / paused), the detected
+**intent**, **known interests**, the **lead draft** with its known and missing
+fields, the **last action**, the **next suggested step**, and any **knowledge
+sources** used. A lead is shown as *created* only once the backend actually
+creates it — exploratory chats never display fake lead data.
+
+## Real LLM
+
+The demo is LLM-first by default (`MOCK_LLM=false`). Configure an
+OpenAI-compatible endpoint — e.g. DeepSeek:
+
+```bash
+MOCK_LLM=false
+OPENAI_BASE_URL=https://api.deepseek.com
+OPENAI_API_KEY=...      # kept in the environment only; never logged or committed
+LLM_MODEL=deepseek-chat
+```

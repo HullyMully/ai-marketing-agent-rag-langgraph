@@ -1,19 +1,27 @@
-"""LLM abstraction with a fully offline mock implementation.
+"""LLM abstraction with an explicit offline mock implementation.
 
-`get_llm()` returns either a `MockLLM` (deterministic, no API key) or a thin
-wrapper around LangChain's `ChatOpenAI`. Both expose the same `.complete(prompt)`
-method, so the rest of the agent never branches on the backend.
+`get_llm()` returns either a thin wrapper around LangChain's `ChatOpenAI` or,
+when explicitly configured, a `MockLLM` (deterministic, no API key). Both expose
+the same `.complete(prompt)` method, so the rest of the agent never branches on
+the backend.
+
+The OpenAI-compatible wrapper works with OpenAI, DeepSeek and similar endpoints
+via `OPENAI_BASE_URL` + `LLM_MODEL`. Secrets are never logged.
 """
 from __future__ import annotations
 
+import logging
+
 from app.config import settings
+
+logger = logging.getLogger("assistant.llm")
 
 
 class MockLLM:
-    """Deterministic stand-in for an LLM (demo mode).
+    """Deterministic stand-in for an LLM (tests/offline demo mode).
 
-    It does not "reason"; it produces grounded, templated text from the prompt's
-    context so the end-to-end pipeline is demonstrable without paid API keys.
+    It does not "reason" or produce production-quality dialogue. Use it only for
+    tests and explicit offline demos when paid/API-backed models are unavailable.
     """
 
     def complete(self, prompt: str) -> str:
@@ -21,20 +29,33 @@ class MockLLM:
 
 
 class OpenAILLM:
-    """Wrapper around an OpenAI-compatible chat model via LangChain."""
+    """Wrapper around an OpenAI-compatible chat model (OpenAI, DeepSeek, ...)."""
 
     def __init__(self) -> None:
         from langchain_openai import ChatOpenAI
 
+        # Never log the API key; log only the non-secret endpoint/model.
+        logger.info(
+            "LLM configured: model=%s base_url=%s timeout=%ss",
+            settings.llm_model, settings.openai_base_url, settings.llm_timeout,
+        )
         self._client = ChatOpenAI(
             model=settings.llm_model,
             api_key=settings.openai_api_key,
             base_url=settings.openai_base_url,
-            temperature=0.3,
+            temperature=settings.llm_temperature,
+            timeout=settings.llm_timeout,
+            max_retries=1,
         )
 
     def complete(self, prompt: str) -> str:
-        return self._client.invoke(prompt).content  # type: ignore[return-value]
+        try:
+            return self._client.invoke(prompt).content  # type: ignore[return-value]
+        except Exception as exc:
+            # Log the failure type only (no prompt contents, no secrets) and
+            # re-raise so callers can fall back safely.
+            logger.warning("LLM request failed: %s", type(exc).__name__)
+            raise
 
 
 def _mock_complete(prompt: str) -> str:
@@ -65,7 +86,7 @@ def _mock_complete(prompt: str) -> str:
             "you're interested in?"
         )
 
-    return "Thanks for your message! How can I help you today?"
+    return "I'm here. Could you rephrase what you want to do next?"
 
 
 def _first_meaningful_lines(text: str, max_lines: int = 2) -> str:
@@ -80,9 +101,18 @@ def _first_meaningful_lines(text: str, max_lines: int = 2) -> str:
 _llm: MockLLM | OpenAILLM | None = None
 
 
+def llm_runtime_mode() -> str:
+    """Return the public runtime mode name for diagnostics/UI metadata."""
+    return "mock" if settings.mock_llm else "llm"
+
+
 def get_llm() -> MockLLM | OpenAILLM:
     """Return a process-wide singleton LLM client."""
     global _llm
     if _llm is None:
-        _llm = MockLLM() if settings.mock_llm else OpenAILLM()
+        if settings.mock_llm:
+            logger.warning("MOCK_LLM is enabled: responses are offline test/demo output, not production AI.")
+            _llm = MockLLM()
+        else:
+            _llm = OpenAILLM()
     return _llm

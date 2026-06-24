@@ -113,8 +113,8 @@ curl -X POST http://localhost:8000/knowledge/ingest
 
 ## Connect an LLM provider
 
-By default the project runs in offline mock mode (`MOCK_LLM=true`) with no API key.
-To use a real OpenAI-compatible provider (OpenAI, DeepSeek, etc.), set in `.env`:
+By default the project is LLM-first (`MOCK_LLM=false`). To use a real
+OpenAI-compatible provider (OpenAI, DeepSeek, etc.), set in `.env`:
 
 ```env
 MOCK_LLM=false

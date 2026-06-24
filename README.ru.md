@@ -98,10 +98,19 @@ OpenAI-совместимым эндпоинтом при настройке.
 ## Ключевые возможности
 
 - Бэкенд на **FastAPI** со схемами Pydantic и документацией Swagger.
-- Состояниевый агент на **LangGraph**: `classify_intent > retrieve_knowledge >
-  decide_action > {collect_missing_info | call_tool | generate_answer |
-  escalate_to_human}`.
+- **LLM-планировщик диалога** как слой рассуждений: на каждое сообщение модель
+  получает профиль компании, релевантные знания, историю, память, черновик лида,
+  состояние тикета и доступные действия и возвращает одно структурированное
+  JSON-решение (интент, режим, извлечённые поля, действие, ответ, источники,
+  уверенность). Вывод **валидируется через Pydantic**, с одной починкой
+  невалидного JSON.
+- **Валидация действий на бэкенде**: планировщик только *рекомендует* — бэкенд
+  решает, создавать ли лид или тикет, а ассистент подтверждает действие только
+  после его выполнения бэкендом. Ответ `/chat` прозрачен об этом
+  (`recommended_action`, `validation`, `action_executed`). Работает на небольшом
+  конвейере **LangGraph** `plan → act`.
 - **LangChain** для шаблонов промптов, абстракции LLM и retriever-цепочки.
+- Поддержка **OpenAI-совместимых / DeepSeek** моделей и детерминированный режим `MOCK_LLM`.
 - **RAG** по markdown-документамcle: чанкинг + эмбеддинги + векторный поиск в **Qdrant**.
 - **Мок-CRM** + **тикеты**, сохраняемые в SQLite через чистый слой репозиториев.
 - **Память сессии** – агент помнит данные (имя, контакт, услугу) в рамках сессии.
@@ -134,10 +143,12 @@ flowchart LR
     SW -->|REST| API
 
     subgraph Backend
-      API --> AG[LangGraph-агент]
+      API --> AG[LangGraph: plan -> act]
+      AG --> PL[LLM-планировщик]
+      PL --> LLM[(OpenAI-совместимый /<br/>DeepSeek, или мок)]
       AG --> MEM[(Память сессии)]
       AG --> RAG[RAG Retriever]
-      AG --> TOOLS[Инструменты:<br/>CRM / Тикеты / Эскалация]
+      AG --> TOOLS[Проверенные инструменты:<br/>CRM / Тикеты / Эскалация]
       RAG --> QD[(Qdrant<br/>Векторная БД)]
       TOOLS --> DB[(SQLite<br/>Лиды · Тикеты · Сообщения)]
       MEM --> DB
@@ -146,21 +157,20 @@ flowchart LR
     KB[knowledge_base/*.md] -->|ingest| QD
 ```
 
-## Поток LangGraph
+## Поток планировщика
 
 ```mermaid
 stateDiagram-v2
-    [*] --> classify_intent
-    classify_intent --> retrieve_knowledge
-    retrieve_knowledge --> decide_action
-    decide_action --> escalate_to_human: явный запрос человека
-    decide_action --> collect_missing_info: лид, не хватает данных
-    decide_action --> call_tool: лид, данные собраны
-    decide_action --> generate_answer: услуги / цены / процесс
-    collect_missing_info --> [*]
-    call_tool --> [*]
-    escalate_to_human --> [*]
-    generate_answer --> [*]
+    [*] --> plan
+    plan --> act: структурированное решение (JSON)
+    act --> create_lead: рекомендовано + правила бэкенда пройдены
+    act --> create_ticket: эскалация обоснована
+    act --> answer_from_knowledge: услуги / цены / процесс
+    act --> ask_or_explore: приветствие / уточнение / обсуждение / пауза
+    create_lead --> [*]
+    create_ticket --> [*]
+    answer_from_knowledge --> [*]
+    ask_or_explore --> [*]
 ```
 
 ## Установка (локально, без Docker)
@@ -174,7 +184,8 @@ cd ai-marketing-agent-rag-langgraph
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
-cp .env.example .env          # по умолчанию: MOCK_LLM=true, мок-эмбеддинги
+cp .env.example .env          # по умолчанию: MOCK_LLM=false
+# затем задайте OPENAI_API_KEY / OPENAI_BASE_URL / LLM_MODEL
 
 python scripts/ingest_knowledge.py   # индексация базы знаний
 python scripts/seed_demo_data.py     # (опц.) демо-данные

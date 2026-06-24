@@ -97,17 +97,25 @@ domains; replace them with your own — see
 ## Key features
 
 - **FastAPI** backend with Pydantic schemas and Swagger docs.
-- **LangGraph** stateful agent: `classify_intent > retrieve_knowledge >
-  decide_action > {collect_missing_info | call_tool | generate_answer |
-  escalate_to_human}`.
+- **LLM dialogue planner** as the reasoning layer: for each message the model gets
+  the company profile, relevant knowledge, history, memory, lead draft, ticket
+  state and available actions, and returns one structured JSON decision (intent,
+  mode, extracted fields, recommended action, reply, sources, confidence). The
+  output is **Pydantic-validated**, with a one-shot JSON repair on malformed output.
+- **Backend action validation**: the planner only *recommends* — the backend
+  decides whether a lead or ticket is actually created, and the assistant only
+  confirms an action after the backend executes it. The `/chat` response is
+  transparent about it (`recommended_action`, `validation`, `action_executed`).
+  Runs on a small **LangGraph** `plan → act` pipeline.
 - **LangChain** for prompt templates, LLM abstraction and the retriever chain.
+- **OpenAI-compatible / DeepSeek** support, plus an explicit deterministic `MOCK_LLM` mode for offline tests/demos.
 - **RAG** over markdown docs with chunking + embeddings + vector search in **Qdrant**.
 - **Mock CRM** + **support tickets** persisted in SQLite via a clean repository layer.
 - **Session memory** – the agent remembers details (name, contact, service) within a session.
 - **Telegram bot** (aiogram) that talks to the API.
 - **Workspace metrics** endpoint (conversations, leads, tickets, escalation / resolved-by-AI rates).
 - **Docker Compose** (app + Qdrant, optional bot), **pytest** suite, and thorough docs.
-- **Runs with zero API keys** in `MOCK_LLM` + mock-embeddings demo mode.
+- **Runs with zero API keys** only when you explicitly enable `MOCK_LLM` + mock embeddings for offline demos.
 
 ## Tech stack
 
@@ -133,10 +141,12 @@ flowchart LR
     SW -->|REST| API
 
     subgraph Backend
-      API --> AG[LangGraph Agent]
+      API --> AG[LangGraph: plan -> act]
+      AG --> PL[LLM Planner]
+      PL --> LLM[(OpenAI-compatible /<br/>DeepSeek, or mock)]
       AG --> MEM[(Session Memory)]
       AG --> RAG[RAG Retriever]
-      AG --> TOOLS[Tools:<br/>CRM / Tickets / Escalation]
+      AG --> TOOLS[Validated tools:<br/>CRM / Tickets / Escalation]
       RAG --> QD[(Qdrant<br/>Vector DB)]
       TOOLS --> DB[(SQLite<br/>Leads · Tickets · Messages)]
       MEM --> DB
@@ -145,22 +155,25 @@ flowchart LR
     KB[knowledge_base/*.md] -->|ingest| QD
 ```
 
-## LangGraph flow
+## Planner flow
 
 ```mermaid
 stateDiagram-v2
-    [*] --> classify_intent
-    classify_intent --> retrieve_knowledge
-    retrieve_knowledge --> decide_action
-    decide_action --> escalate_to_human: explicit human request
-    decide_action --> collect_missing_info: lead, missing info
-    decide_action --> call_tool: lead, info complete
-    decide_action --> generate_answer: service / pricing / workflow
-    collect_missing_info --> [*]
-    call_tool --> [*]
-    escalate_to_human --> [*]
-    generate_answer --> [*]
+    [*] --> plan
+    plan --> act: structured decision (JSON)
+    act --> create_lead: recommended + backend rules pass
+    act --> create_ticket: escalation justified
+    act --> answer_from_knowledge: service / pricing / process
+    act --> ask_or_explore: greet / clarify / explore / pause
+    create_lead --> [*]
+    create_ticket --> [*]
+    answer_from_knowledge --> [*]
+    ask_or_explore --> [*]
 ```
+
+In the `plan` node the planner receives the full context and returns a single
+JSON decision; the `act` node validates and executes it. The LLM never creates a
+lead or ticket directly — the backend rules do.
 
 ## Setup (local, no Docker)
 
@@ -175,8 +188,9 @@ cd ai-marketing-agent-rag-langgraph
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
-# 3. Configure (demo mode works out of the box)
-cp .env.example .env          # defaults: MOCK_LLM=true, mock embeddings
+# 3. Configure a real OpenAI-compatible LLM
+cp .env.example .env          # defaults: MOCK_LLM=false
+# then set OPENAI_API_KEY / OPENAI_BASE_URL / LLM_MODEL
 
 # 4. Ingest the knowledge base (uses in-memory store if Qdrant isn't running)
 python scripts/ingest_knowledge.py

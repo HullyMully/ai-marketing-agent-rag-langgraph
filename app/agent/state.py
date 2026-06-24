@@ -19,6 +19,8 @@ class AgentState(TypedDict, total=False):
     # --- classification ---
     intent: str
     confidence: float
+    llm_runtime_mode: str
+    mock_llm: bool
 
     # --- routing ---
     route: str
@@ -43,10 +45,26 @@ class AgentState(TypedDict, total=False):
     next_step: str
     dialogue_state: dict[str, Any]
 
+    # --- LLM planner ---
+    decision: Any                  # planner.PlannerDecision
+    knowledge_context: list[dict[str, str]]
+    user_intent: str
+    conversation_target: str
+    context_relation: str
+    should_continue_qualification: bool
+    recommended_action: str
+    knowledge_used: bool
+    assistant_reply: str
+
     # --- retrieval ---
     retrieved: list[str]
     sources: list[str]
     memory_used: bool
+
+    # --- backend validation ---
+    validation: dict[str, Any]
+    action_executed: bool
+    planner_decision: dict[str, Any]
 
     # --- outputs / side effects ---
     answer: str
