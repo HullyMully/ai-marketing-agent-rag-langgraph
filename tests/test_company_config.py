@@ -28,6 +28,24 @@ def _clear_company_env(monkeypatch) -> None:
         monkeypatch.delenv(env, raising=False)
 
 
+def _use_example_config(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr("app.company._CONFIG_DIR", tmp_path)
+    (tmp_path / "company.example.json").write_text(
+        """
+{
+  "company_name": "Acme Growth Studio",
+  "company_domain": "acme.example",
+  "company_description": "Digital marketing and customer acquisition agency",
+  "company_contact_email": "hello@acme.example",
+  "assistant_name": "AI Assistant",
+  "escalation_target": "human manager",
+  "business_industry": "digital marketing"
+}
+""".strip(),
+        encoding="utf-8",
+    )
+
+
 def test_fallbacks_are_generic_and_safe() -> None:
     # Built-in fallbacks must never embed a real or demo company.
     assert _FALLBACK["company_name"] == ""
@@ -36,17 +54,19 @@ def test_fallbacks_are_generic_and_safe() -> None:
     assert "novagrowth" not in str(_FALLBACK).lower()
 
 
-def test_loads_example_profile_when_no_env(monkeypatch) -> None:
+def test_loads_example_profile_when_no_env(monkeypatch, tmp_path) -> None:
     # With no COMPANY_* env vars, values come from config/company.example.json.
     _clear_company_env(monkeypatch)
+    _use_example_config(monkeypatch, tmp_path)
     profile = load_company_profile()
     assert profile.company_name == "Acme Growth Studio"
     assert profile.company_domain == "acme.example"
     assert profile.business_industry == "digital marketing"
 
 
-def test_env_overrides_json_config(monkeypatch) -> None:
+def test_env_overrides_json_config(monkeypatch, tmp_path) -> None:
     _clear_company_env(monkeypatch)
+    _use_example_config(monkeypatch, tmp_path)
     monkeypatch.setenv("COMPANY_NAME", "Bright Robotics")
     monkeypatch.setenv("BUSINESS_INDUSTRY", "industrial automation")
     profile = load_company_profile()
@@ -56,8 +76,9 @@ def test_env_overrides_json_config(monkeypatch) -> None:
     assert profile.company_domain == "acme.example"
 
 
-def test_brand_label_uses_company_name(monkeypatch) -> None:
+def test_brand_label_uses_company_name(monkeypatch, tmp_path) -> None:
     _clear_company_env(monkeypatch)
+    _use_example_config(monkeypatch, tmp_path)
     monkeypatch.setenv("COMPANY_NAME", "Bright Robotics")
     profile = load_company_profile()
     assert profile.brand_label == "Bright Robotics Assistant"
@@ -73,8 +94,9 @@ def test_brand_label_falls_back_to_product_name() -> None:
     assert profile.display_name == "our team"
 
 
-def test_public_dict_has_no_secrets(monkeypatch) -> None:
+def test_public_dict_has_no_secrets(monkeypatch, tmp_path) -> None:
     _clear_company_env(monkeypatch)
+    _use_example_config(monkeypatch, tmp_path)
     profile = load_company_profile()
     public = profile.public_dict()
     keys = " ".join(public).lower()

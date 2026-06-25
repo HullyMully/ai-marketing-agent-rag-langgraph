@@ -23,6 +23,24 @@ def init_db() -> None:
     from app.db import models  # noqa: F401  (ensures models are registered)
 
     models.Base.metadata.create_all(bind=engine)
+    _ensure_runtime_columns()
+
+
+def _ensure_runtime_columns() -> None:
+    """Small SQLite compatibility shim for demo DBs created before new columns.
+
+    Production deployments should use real migrations; this keeps local
+    workspaces from breaking when the prototype schema grows.
+    """
+    if not settings.database_url.startswith("sqlite"):
+        return
+    with engine.begin() as conn:
+        rows = conn.exec_driver_sql("PRAGMA table_info(tickets)").fetchall()
+        existing = {row[1] for row in rows}
+        if rows and "assignee" not in existing:
+            conn.exec_driver_sql("ALTER TABLE tickets ADD COLUMN assignee VARCHAR(120)")
+        if rows and "updated_at" not in existing:
+            conn.exec_driver_sql("ALTER TABLE tickets ADD COLUMN updated_at DATETIME")
 
 
 def get_db() -> Iterator[Session]:

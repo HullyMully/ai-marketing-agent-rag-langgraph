@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from app.db.database import session_scope
-from app.db.repositories import TicketRepository
+from app.db.repositories import AuditLogRepository, TicketRepository
 
 
 def create_ticket(
@@ -16,6 +16,13 @@ def create_ticket(
     with session_scope() as db:
         ticket = TicketRepository(db).create(
             user_id=user_id, reason=reason, summary=summary, priority=priority
+        )
+        AuditLogRepository(db).create(
+            actor="assistant",
+            action="ticket.created",
+            entity_type="ticket",
+            entity_id=ticket.id,
+            summary=f"Assistant created ticket #{ticket.id}: {reason}",
         )
         return {
             "id": ticket.id,

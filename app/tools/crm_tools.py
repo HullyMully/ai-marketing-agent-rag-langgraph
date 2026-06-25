@@ -8,7 +8,8 @@ and safe to publish (no real services, no secrets).
 from __future__ import annotations
 
 from app.db.database import session_scope
-from app.db.repositories import LeadRepository
+from app.db.repositories import AuditLogRepository, LeadRepository
+from app.tools.crm_integrations import dispatch_lead_to_crm
 
 
 def create_lead(
@@ -34,14 +35,25 @@ def create_lead(
             message=message,
             status="new",
         )
-        return {
+        lead_data = {
             "id": lead.id,
             "name": lead.name,
             "company": lead.company,
             "contact": lead.contact,
             "service_interest": lead.service_interest,
+            "budget_range": lead.budget_range,
+            "message": lead.message,
             "status": lead.status,
         }
+        AuditLogRepository(db).create(
+            actor="assistant",
+            action="lead.created",
+            entity_type="lead",
+            entity_id=lead.id,
+            summary=f"Assistant created lead #{lead.id} for {lead.company or lead.name}",
+        )
+    dispatch_lead_to_crm(lead_data)
+    return lead_data
 
 
 def get_service_info(retriever, query: str) -> dict:

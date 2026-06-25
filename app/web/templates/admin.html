@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Customer Assistant — Admin</title>
-  <link rel="stylesheet" href="/static/styles.css?v=10">
+  <link rel="stylesheet" href="/static/styles.css?v=11">
 </head>
 <body>
   <header class="app-header">
@@ -96,6 +96,82 @@
       </form>
     </section>
 
+    <section class="ops-grid">
+      <div class="admin-panel kb-panel">
+        <div class="admin-panel-head">
+          <div>
+            <p class="section-title">Knowledge base</p>
+            <h2>Documents</h2>
+          </div>
+          <div class="admin-actions compact">
+            <button id="kb-reindex" class="btn btn-primary" type="button">Re-index</button>
+            <button id="kb-new" class="btn" type="button">New file</button>
+          </div>
+        </div>
+        <div class="kb-layout">
+          <div id="kb-file-list" class="kb-file-list">
+            <div class="admin-empty">Loading files…</div>
+          </div>
+          <form id="kb-form" class="kb-editor">
+            <div class="kb-editor-head">
+              <input id="kb-file-name" type="text" placeholder="services.md">
+              <span id="kb-status" class="save-status">Idle</span>
+            </div>
+            <textarea id="kb-content" rows="14" placeholder="Select a markdown file or create a new one"></textarea>
+            <div class="admin-actions">
+              <button id="kb-save" class="btn btn-primary" type="submit">Save file</button>
+              <button id="kb-delete" class="btn" type="button">Delete</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <aside class="admin-panel crm-panel">
+        <div class="admin-panel-head">
+          <div>
+            <p class="section-title">Integrations</p>
+            <h2>CRM sync</h2>
+          </div>
+          <span id="crm-save-status" class="save-status">Idle</span>
+        </div>
+        <form id="crm-form" class="crm-form">
+          <label>
+            <span>Provider</span>
+            <select name="provider">
+              <option value="local">Local only</option>
+              <option value="webhook">Webhook</option>
+              <option value="hubspot">HubSpot adapter</option>
+              <option value="pipedrive">Pipedrive adapter</option>
+              <option value="google_sheets">Google Sheets adapter</option>
+            </select>
+          </label>
+          <label class="check-row">
+            <input name="enabled" type="checkbox">
+            <span>Enable outbound sync</span>
+          </label>
+          <label>
+            <span>Webhook URL</span>
+            <input name="webhook_url" type="url" placeholder="https://crm.example/webhook">
+          </label>
+          <label>
+            <span>API key env var</span>
+            <input name="api_key_env" type="text" placeholder="HUBSPOT_API_KEY">
+          </label>
+          <label>
+            <span>Pipeline / list</span>
+            <input name="pipeline_name" type="text" placeholder="Inbound SaaS leads">
+          </label>
+          <button id="crm-save" class="btn btn-primary" type="submit">Save integration</button>
+        </form>
+        <div class="dispatch-list-wrap">
+          <div class="section-title">Recent sync attempts</div>
+          <div id="dispatch-list" class="dispatch-list">
+            <div class="admin-empty">No sync attempts yet.</div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
     <section class="admin-grid">
       <div class="admin-panel leads-panel">
         <div class="admin-panel-head">
@@ -128,7 +204,7 @@
         <div class="admin-panel-head">
           <div>
             <p class="section-title">Support</p>
-            <h2>Tickets</h2>
+            <h2>Human inbox</h2>
           </div>
         </div>
         <div id="tickets-list" class="ticket-list">
@@ -136,8 +212,20 @@
         </div>
       </aside>
     </section>
+
+    <section class="admin-panel audit-panel">
+      <div class="admin-panel-head">
+        <div>
+          <p class="section-title">Governance</p>
+          <h2>Audit log</h2>
+        </div>
+      </div>
+      <div id="audit-list" class="audit-list">
+        <div class="admin-empty">Loading audit events…</div>
+      </div>
+    </section>
   </main>
 
-  <script src="/static/admin.js?v=2" defer></script>
+  <script src="/static/admin.js?v=3" defer></script>
 </body>
 </html>

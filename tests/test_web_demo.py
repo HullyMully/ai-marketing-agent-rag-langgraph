@@ -61,6 +61,10 @@ def test_admin_page_ok(client: TestClient) -> None:
     assert "text/html" in resp.headers["content-type"]
     assert "Leads and customer requests" in resp.text
     assert "Company profile" in resp.text
+    assert "Knowledge base" in resp.text
+    assert "Human inbox" in resp.text
+    assert "CRM sync" in resp.text
+    assert "Audit log" in resp.text
     assert 'name="company_name"' in resp.text
     assert "/static/admin.js" in resp.text
 

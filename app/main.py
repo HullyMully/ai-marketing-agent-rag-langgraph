@@ -11,15 +11,17 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy.orm import Session
 
-from app.api import chat, crm, knowledge, metrics, tickets
+from app.api import audit, chat, crm, knowledge, metrics, tickets
 from app.agent.llm import llm_runtime_mode
 from app.company import get_company, profile_to_dict, save_company_profile
 from app.config import settings
-from app.db.database import init_db
+from app.db.database import get_db, init_db
+from app.db.repositories import AuditLogRepository
 from app.schemas.company import CompanyProfileOut, CompanyProfileUpdate
 
 WEB_DIR = Path(__file__).resolve().parent / "web"
@@ -62,6 +64,7 @@ app.include_router(crm.router)
 app.include_router(tickets.router)
 app.include_router(knowledge.router)
 app.include_router(metrics.router)
+app.include_router(audit.router)
 
 # Serve the web UI (plain HTML/CSS/JS).
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
@@ -110,9 +113,18 @@ def company_profile() -> CompanyProfileOut:
 
 
 @app.put("/config/profile", response_model=CompanyProfileOut, tags=["system"])
-def update_company_profile(payload: CompanyProfileUpdate) -> CompanyProfileOut:
+def update_company_profile(
+    payload: CompanyProfileUpdate,
+    db: Session = Depends(get_db),
+) -> CompanyProfileOut:
     """Persist company profile changes to the local runtime profile file."""
     profile = save_company_profile(payload.model_dump())
+    AuditLogRepository(db).create(
+        actor="admin",
+        action="company_profile.updated",
+        entity_type="company_profile",
+        summary=f"Updated company profile for {profile.brand_label}",
+    )
     return CompanyProfileOut(**profile_to_dict(profile))
 
 

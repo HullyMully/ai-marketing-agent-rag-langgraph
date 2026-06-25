@@ -46,6 +46,7 @@ a browser:
 
 - Landing page: <http://localhost:8000/>
 - Web demo: <http://localhost:8000/demo>
+- Admin panel: <http://localhost:8000/admin>
 - API overview: <http://localhost:8000/api-overview>
 - Metrics dashboard: <http://localhost:8000/metrics>
 - Swagger docs: <http://localhost:8000/docs>
@@ -63,6 +64,8 @@ You can also talk to the agent through the Telegram bot.
 - FastAPI backend
 - Telegram bot integration
 - CRM-style lead creation and escalation tickets
+- Admin panel for company profile, knowledge-base documents, human inbox,
+  CRM integration settings, dispatch history and audit events
 - Session memory and stateful dialogue
 - Multi-turn lead qualification (asks only for missing fields, handles corrections)
 - Natural dialogue policy: handles greetings, jokes, confusion and frustration,
@@ -111,10 +114,12 @@ domains; replace them with your own — see
 - **OpenAI-compatible / DeepSeek** support, plus an explicit deterministic `MOCK_LLM` mode for offline tests/demos.
 - **RAG** over markdown docs with chunking + embeddings + vector search in **Qdrant**.
 - **Mock CRM** + **support tickets** persisted in SQLite via a clean repository layer.
+- **Admin panel** for company setup, markdown knowledge-base editing, human
+  inbox operations, CRM sync settings, dispatch history and audit log.
 - **Session memory** – the agent remembers details (name, contact, service) within a session.
 - **Telegram bot** (aiogram) that talks to the API.
 - **Workspace metrics** endpoint (conversations, leads, tickets, escalation / resolved-by-AI rates).
-- **Docker Compose** (app + Qdrant, optional bot), **pytest** suite, and thorough docs.
+- **Docker Compose** for local demos, plus a production-oriented Postgres + Qdrant stack.
 - **Runs with zero API keys** only when you explicitly enable `MOCK_LLM` + mock embeddings for offline demos.
 
 ## Tech stack
@@ -267,6 +272,15 @@ docker compose --profile bot up --build
 - API: http://localhost:8000/docs
 - Qdrant dashboard: http://localhost:6333/dashboard
 
+For a production-style deployment with PostgreSQL, Qdrant and real LLM settings:
+
+```bash
+cp .env.production.example .env.production
+docker compose -f docker-compose.prod.yml --env-file .env.production up --build -d
+```
+
+See [docs/production-deploy.md](docs/production-deploy.md).
+
 ## Telegram bot setup
 
 1. Create a bot with [@BotFather](https://t.me/BotFather) and copy the token.
@@ -315,10 +329,16 @@ curl http://localhost:8000/metrics/demo
 | POST | `/chat` | Talk to the agent |
 | POST | `/crm/leads` | Create a CRM lead |
 | GET | `/crm/leads` | List leads |
+| GET/PUT | `/crm/integration` | View/update outbound CRM integration |
+| GET | `/crm/dispatches` | List CRM sync attempts |
 | POST | `/tickets` | Create a ticket |
 | GET | `/tickets` | List tickets |
 | GET | `/tickets/{id}` | Get one ticket |
+| PATCH | `/tickets/{id}` | Update status, priority or assignee |
+| GET/POST | `/tickets/{id}/notes` | List/add internal human-inbox notes |
+| GET/PUT/DELETE | `/knowledge/files/{path}` | Manage markdown knowledge files |
 | POST | `/knowledge/ingest` | (Re)index the knowledge base |
+| GET | `/audit/events` | List admin/operator audit events |
 | GET | `/metrics/demo` | Workspace metrics |
 
 ## Example conversations
@@ -338,8 +358,8 @@ social-preview image prompt.
 
 See [docs/limitations.md](docs/limitations.md) – highlights: the mock LLM and mock
 embeddings are deterministic stand-ins (not semantically strong), there is no auth,
-and the "CRM" is a local SQLite table modelling the integration pattern rather than
-a real SaaS connector.
+and provider-specific CRM adapters beyond webhook dispatch still need to be
+implemented before public production use.
 
 ## Roadmap
 
@@ -354,6 +374,7 @@ auth, evaluation harness, richer analytics dashboard, and more.
 - [RAG](docs/rag.md) / [RU](docs/rag.ru.md)
 - [LangGraph flow](docs/langgraph-flow.md) / [RU](docs/langgraph-flow.ru.md)
 - [Web demo](docs/web-demo.md) / [RU](docs/web-demo.ru.md)
+- [Production deploy](docs/production-deploy.md)
 - [Demo walkthrough](docs/demo/demo-walkthrough.md) / [RU](docs/demo/demo-walkthrough.ru.md)
 - [Portfolio case study](docs/portfolio-case-study.md) / [RU](docs/portfolio-case-study.ru.md)
 - [Limitations](docs/limitations.md) / [RU](docs/limitations.ru.md)

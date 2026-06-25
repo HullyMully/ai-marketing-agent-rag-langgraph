@@ -16,6 +16,21 @@ class TicketCreate(BaseModel):
     status: str = "open"
 
 
+class TicketUpdate(BaseModel):
+    """Fields an operator can update from the human inbox."""
+
+    status: str | None = None
+    priority: str | None = None
+    assignee: str | None = None
+
+
+class TicketNoteCreate(BaseModel):
+    """Internal note added by a human operator."""
+
+    author: str = Field(default="operator", min_length=1)
+    body: str = Field(..., min_length=1)
+
+
 class TicketOut(BaseModel):
     """Ticket as returned by the API."""
 
@@ -27,4 +42,18 @@ class TicketOut(BaseModel):
     summary: str
     priority: str
     status: str
+    assignee: str | None = None
+    created_at: datetime
+    updated_at: datetime | None = None
+
+
+class TicketNoteOut(BaseModel):
+    """Internal ticket note returned to the admin inbox."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    ticket_id: int
+    author: str
+    body: str
     created_at: datetime
