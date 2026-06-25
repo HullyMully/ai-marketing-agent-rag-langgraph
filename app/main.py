@@ -17,9 +17,10 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api import chat, crm, knowledge, metrics, tickets
 from app.agent.llm import llm_runtime_mode
-from app.company import get_company
+from app.company import get_company, profile_to_dict, save_company_profile
 from app.config import settings
 from app.db.database import init_db
+from app.schemas.company import CompanyProfileOut, CompanyProfileUpdate
 
 WEB_DIR = Path(__file__).resolve().parent / "web"
 STATIC_DIR = WEB_DIR / "static"
@@ -100,6 +101,19 @@ def admin_page() -> FileResponse:
 def public_config() -> dict:
     """Public, non-secret business profile used by the web UI."""
     return get_company().public_dict()
+
+
+@app.get("/config/profile", response_model=CompanyProfileOut, tags=["system"])
+def company_profile() -> CompanyProfileOut:
+    """Editable non-secret company profile for the admin panel."""
+    return CompanyProfileOut(**profile_to_dict(get_company()))
+
+
+@app.put("/config/profile", response_model=CompanyProfileOut, tags=["system"])
+def update_company_profile(payload: CompanyProfileUpdate) -> CompanyProfileOut:
+    """Persist company profile changes to the local runtime profile file."""
+    profile = save_company_profile(payload.model_dump())
+    return CompanyProfileOut(**profile_to_dict(profile))
 
 
 @app.get("/health", tags=["system"])

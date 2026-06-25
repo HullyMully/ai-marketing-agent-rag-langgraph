@@ -5,8 +5,8 @@ identity is loaded from (in increasing priority):
 
 1. built-in safe fallbacks,
 2. ``config/company.example.json`` (the shipped sample profile),
-3. ``config/company.local.json`` (a real deployment's profile — git-ignored),
-4. environment variables (``COMPANY_NAME``, ``COMPANY_DOMAIN``, ...).
+3. environment variables (``COMPANY_NAME``, ``COMPANY_DOMAIN``, ...),
+4. ``config/company.local.json`` (admin/runtime profile — git-ignored).
 
 Nothing here is secret; LLM/API keys live only in the environment, never in the
 company profile.
@@ -79,7 +79,9 @@ class CompanyProfile:
         return {
             "product_name": PRODUCT_NAME,
             "company_name": self.company_name,
+            "company_domain": self.company_domain,
             "company_description": self.company_description,
+            "company_contact_email": self.company_contact_email,
             "business_industry": self.business_industry,
             "assistant_name": self.assistant_name,
             "escalation_target": self.escalation_target,
@@ -100,11 +102,11 @@ def load_company_profile() -> CompanyProfile:
     """Resolve the company profile from fallbacks, JSON files and env vars."""
     data = dict(_FALLBACK)
     data.update({k: v for k, v in _load_json(_CONFIG_DIR / "company.example.json").items() if k in data})
-    data.update({k: v for k, v in _load_json(_CONFIG_DIR / "company.local.json").items() if k in data})
     for key, env in _ENV_KEYS.items():
         value = os.environ.get(env)
         if value:
             data[key] = value
+    data.update({k: v for k, v in _load_json(_CONFIG_DIR / "company.local.json").items() if k in data})
     return CompanyProfile(**{k: str(data.get(k, "")) for k in _FALLBACK})
 
 
@@ -116,4 +118,40 @@ def get_company() -> CompanyProfile:
     global _profile
     if _profile is None:
         _profile = load_company_profile()
+    return _profile
+
+
+def profile_to_dict(profile: CompanyProfile) -> dict:
+    """Return all non-secret editable company profile fields."""
+    return {
+        "product_name": PRODUCT_NAME,
+        "company_name": profile.company_name,
+        "company_domain": profile.company_domain,
+        "company_description": profile.company_description,
+        "company_contact_email": profile.company_contact_email,
+        "assistant_name": profile.assistant_name,
+        "escalation_target": profile.escalation_target,
+        "business_industry": profile.business_industry,
+        "brand_label": profile.brand_label,
+    }
+
+
+def save_company_profile(values: dict) -> CompanyProfile:
+    """Persist editable company settings to the git-ignored local profile file."""
+    global _profile
+    current = {
+        key: getattr(get_company(), key)
+        for key in _FALLBACK
+    }
+    for key in _FALLBACK:
+        if key in values:
+            current[key] = str(values.get(key, "")).strip()
+
+    _CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    path = _CONFIG_DIR / "company.local.json"
+    path.write_text(
+        json.dumps(current, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    _profile = load_company_profile()
     return _profile

@@ -2,7 +2,7 @@
 
 These verify the resolution order documented in ``app/company.py``:
 
-    built-in fallbacks  <  company.example.json  <  company.local.json  <  env vars
+    built-in fallbacks  <  company.example.json  <  env vars  <  company.local.json
 
 The tests call :func:`load_company_profile` directly (it re-reads the config
 files and the environment on every call) so they never touch the cached
@@ -16,6 +16,8 @@ from app.company import (
     _ENV_KEYS,
     _FALLBACK,
     load_company_profile,
+    profile_to_dict,
+    save_company_profile,
 )
 
 _COMPANY_ENV_VARS = list(_ENV_KEYS.values())
@@ -80,3 +82,45 @@ def test_public_dict_has_no_secrets(monkeypatch) -> None:
     assert "token" not in keys
     assert "password" not in keys
     assert public["product_name"] == "AI Customer Assistant"
+
+
+def test_local_profile_overrides_env_for_admin_updates(monkeypatch, tmp_path) -> None:
+    _clear_company_env(monkeypatch)
+    monkeypatch.setenv("COMPANY_NAME", "Env Brand")
+    local = tmp_path / "config"
+    local.mkdir()
+    monkeypatch.setattr("app.company._CONFIG_DIR", local)
+    (local / "company.example.json").write_text(
+        '{"company_name":"Example Brand","company_domain":"example.test"}',
+        encoding="utf-8",
+    )
+    (local / "company.local.json").write_text(
+        '{"company_name":"Admin Brand","business_industry":"SaaS"}',
+        encoding="utf-8",
+    )
+
+    profile = load_company_profile()
+
+    assert profile.company_name == "Admin Brand"
+    assert profile.business_industry == "SaaS"
+
+
+def test_save_company_profile_writes_local_json(monkeypatch, tmp_path) -> None:
+    _clear_company_env(monkeypatch)
+    monkeypatch.setattr("app.company._CONFIG_DIR", tmp_path)
+    monkeypatch.setattr("app.company._profile", None)
+
+    profile = save_company_profile({
+        "company_name": "Saved Studio",
+        "company_domain": "saved.example",
+        "company_description": "A saved company profile",
+        "company_contact_email": "hello@saved.example",
+        "assistant_name": "Saved Assistant",
+        "escalation_target": "account manager",
+        "business_industry": "consulting",
+    })
+
+    assert profile.company_name == "Saved Studio"
+    assert (tmp_path / "company.local.json").exists()
+    public = profile_to_dict(profile)
+    assert public["brand_label"] == "Saved Studio Assistant"

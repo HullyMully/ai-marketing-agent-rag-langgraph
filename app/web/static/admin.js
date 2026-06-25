@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  var state = { leads: [], tickets: [], metrics: null };
+  var state = { leads: [], tickets: [], metrics: null, company: null };
 
   var els = {
     brand: document.getElementById("brand-name"),
@@ -13,13 +13,26 @@
     resolved: document.getElementById("admin-resolved"),
     leadFilter: document.getElementById("lead-filter"),
     leadsBody: document.getElementById("leads-body"),
-    ticketsList: document.getElementById("tickets-list")
+    ticketsList: document.getElementById("tickets-list"),
+    companyForm: document.getElementById("company-form"),
+    companySave: document.getElementById("company-save"),
+    companyStatus: document.getElementById("company-save-status")
   };
 
   function getJSON(url) {
     return fetch(url).then(function (r) {
       return r.ok ? r.json() : null;
     }).catch(function () { return null; });
+  }
+
+  function putJSON(url, payload) {
+    return fetch(url, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).then(function (r) {
+      return r.ok ? r.json() : Promise.reject(new Error("save failed"));
+    });
   }
 
   function pct(x) {
@@ -96,6 +109,69 @@
     });
   }
 
+  function renderCompany() {
+    if (!state.company || !els.companyForm) { return; }
+    [
+      "company_name",
+      "company_domain",
+      "company_description",
+      "company_contact_email",
+      "assistant_name",
+      "escalation_target",
+      "business_industry"
+    ].forEach(function (key) {
+      var field = els.companyForm.elements[key];
+      if (field) { field.value = state.company[key] || ""; }
+    });
+    if (state.company.brand_label && els.brand) {
+      els.brand.textContent = state.company.brand_label;
+    }
+    setSaveStatus("Loaded", "");
+  }
+
+  function setSaveStatus(text, mode) {
+    if (!els.companyStatus) { return; }
+    els.companyStatus.textContent = text;
+    els.companyStatus.classList.toggle("ok", mode === "ok");
+    els.companyStatus.classList.toggle("error", mode === "error");
+  }
+
+  function formPayload() {
+    var data = {};
+    if (!els.companyForm) { return data; }
+    [
+      "company_name",
+      "company_domain",
+      "company_description",
+      "company_contact_email",
+      "assistant_name",
+      "escalation_target",
+      "business_industry"
+    ].forEach(function (key) {
+      data[key] = (els.companyForm.elements[key]?.value || "").trim();
+    });
+    return data;
+  }
+
+  function saveCompany(event) {
+    event.preventDefault();
+    if (!els.companyForm) { return; }
+    if (els.companySave) { els.companySave.disabled = true; }
+    setSaveStatus("Saving…", "");
+    putJSON("/config/profile", formPayload())
+      .then(function (profile) {
+        state.company = profile;
+        renderCompany();
+        setSaveStatus("Saved", "ok");
+      })
+      .catch(function () {
+        setSaveStatus("Could not save", "error");
+      })
+      .finally(function () {
+        if (els.companySave) { els.companySave.disabled = false; }
+      });
+  }
+
   function esc(value) {
     return String(value ?? "").replace(/[&<>"']/g, function (ch) {
       return {
@@ -112,6 +188,7 @@
     renderMetrics();
     renderLeads();
     renderTickets();
+    renderCompany();
   }
 
   function load() {
@@ -119,11 +196,13 @@
     Promise.all([
       getJSON("/metrics/demo"),
       getJSON("/crm/leads"),
-      getJSON("/tickets")
+      getJSON("/tickets"),
+      getJSON("/config/profile")
     ]).then(function (items) {
       state.metrics = items[0] || {};
       state.leads = Array.isArray(items[1]) ? items[1] : [];
       state.tickets = Array.isArray(items[2]) ? items[2] : [];
+      state.company = items[3] || null;
       renderAll();
     }).finally(function () {
       if (els.refresh) { els.refresh.disabled = false; }
@@ -136,5 +215,6 @@
 
   if (els.refresh) { els.refresh.addEventListener("click", load); }
   if (els.leadFilter) { els.leadFilter.addEventListener("input", renderLeads); }
+  if (els.companyForm) { els.companyForm.addEventListener("submit", saveCompany); }
   load();
 })();

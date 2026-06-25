@@ -1,6 +1,8 @@
 """Tests for the local web demo pages and static assets."""
 from fastapi.testclient import TestClient
 
+from app import company as company_mod
+
 
 def test_landing_page_ok(client: TestClient) -> None:
     resp = client.get("/")
@@ -58,7 +60,37 @@ def test_admin_page_ok(client: TestClient) -> None:
     assert resp.status_code == 200
     assert "text/html" in resp.headers["content-type"]
     assert "Leads and customer requests" in resp.text
+    assert "Company profile" in resp.text
+    assert 'name="company_name"' in resp.text
     assert "/static/admin.js" in resp.text
+
+
+def test_company_profile_api_can_update_local_profile(
+    client: TestClient, monkeypatch, tmp_path
+) -> None:
+    monkeypatch.setattr(company_mod, "_CONFIG_DIR", tmp_path)
+    monkeypatch.setattr(company_mod, "_profile", None)
+    payload = {
+        "company_name": "Panel Studio",
+        "company_domain": "panel.example",
+        "company_description": "Panel-managed profile",
+        "company_contact_email": "hello@panel.example",
+        "assistant_name": "Panel Assistant",
+        "escalation_target": "account manager",
+        "business_industry": "SaaS",
+    }
+
+    saved = client.put("/config/profile", json=payload)
+
+    assert saved.status_code == 200
+    body = saved.json()
+    assert body["company_name"] == "Panel Studio"
+    assert body["brand_label"] == "Panel Studio Assistant"
+    assert (tmp_path / "company.local.json").exists()
+
+    loaded = client.get("/config/profile")
+    assert loaded.status_code == 200
+    assert loaded.json()["assistant_name"] == "Panel Assistant"
 
 
 def test_static_css_loads(client: TestClient) -> None:

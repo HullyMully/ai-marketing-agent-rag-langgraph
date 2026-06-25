@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Customer Assistant — Admin</title>
-  <link rel="stylesheet" href="/static/styles.css?v=9">
+  <link rel="stylesheet" href="/static/styles.css?v=10">
 </head>
 <body>
   <header class="app-header">
@@ -53,6 +53,49 @@
       </article>
     </section>
 
+    <section class="admin-panel company-settings">
+      <div class="admin-panel-head">
+        <div>
+          <p class="section-title">Assistant setup</p>
+          <h2>Company profile</h2>
+        </div>
+        <span id="company-save-status" class="save-status">Not saved</span>
+      </div>
+      <form id="company-form" class="company-form">
+        <label>
+          <span>Company name</span>
+          <input name="company_name" type="text" placeholder="Acme Growth Studio">
+        </label>
+        <label>
+          <span>Domain</span>
+          <input name="company_domain" type="text" placeholder="acme.example">
+        </label>
+        <label>
+          <span>Assistant name</span>
+          <input name="assistant_name" type="text" placeholder="AI Assistant">
+        </label>
+        <label>
+          <span>Industry</span>
+          <input name="business_industry" type="text" placeholder="digital marketing">
+        </label>
+        <label>
+          <span>Contact email</span>
+          <input name="company_contact_email" type="email" placeholder="hello@example.com">
+        </label>
+        <label>
+          <span>Escalation target</span>
+          <input name="escalation_target" type="text" placeholder="human manager">
+        </label>
+        <label class="wide">
+          <span>Description</span>
+          <textarea name="company_description" rows="3" placeholder="What the company does, in one sentence"></textarea>
+        </label>
+        <div class="company-form-actions">
+          <button id="company-save" class="btn btn-primary" type="submit">Save profile</button>
+        </div>
+      </form>
+    </section>
+
     <section class="admin-grid">
       <div class="admin-panel leads-panel">
         <div class="admin-panel-head">
@@ -95,6 +138,6 @@
     </section>
   </main>
 
-  <script src="/static/admin.js?v=1" defer></script>
+  <script src="/static/admin.js?v=2" defer></script>
 </body>
 </html>
