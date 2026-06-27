@@ -9,7 +9,6 @@ otherwise prints what's missing and exits with code 1.
 """
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,19 +19,23 @@ EXPECTED_ASSETS: list[str] = [
     "docs/assets/architecture-overview.svg",
     "docs/assets/langgraph-flow.svg",
     "docs/assets/rag-pipeline.svg",
-    # screenshot mockups
-    "docs/screenshots/demo-chat.svg",
-    "docs/screenshots/crm-lead-created.svg",
-    "docs/screenshots/escalation-ticket.svg",
-    "docs/screenshots/demo-metrics.svg",
-    "docs/screenshots/api-overview.svg",
+    # real product screenshots (PNG) — these are what the README displays
+    "docs/screenshots/landing-page.png",
+    "docs/screenshots/web-chat-lead-flow.png",
+    "docs/screenshots/api-overview.png",
+    "docs/screenshots/metrics-dashboard.png",
 ]
 
 MIN_BYTES = 500  # a real asset is comfortably larger than this
+_PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 
 
 def check_assets(root: Path = ROOT) -> tuple[list[str], list[str]]:
-    """Return (ok, problems) lists of asset descriptions."""
+    """Return (ok, problems) lists of asset descriptions.
+
+    SVG diagrams must contain an ``<svg`` tag; PNG screenshots must start with
+    the PNG signature. Both must be comfortably non-empty.
+    """
     ok: list[str] = []
     problems: list[str] = []
     for rel in EXPECTED_ASSETS:
@@ -40,11 +43,15 @@ def check_assets(root: Path = ROOT) -> tuple[list[str], list[str]]:
         if not path.exists():
             problems.append(f"MISSING  {rel}")
             continue
-        data = path.read_text(encoding="utf-8", errors="ignore")
         size = path.stat().st_size
         if size < MIN_BYTES:
             problems.append(f"TOO SMALL {rel} ({size} bytes)")
-        elif "<svg" not in data:
+        elif rel.endswith(".png"):
+            if path.read_bytes()[:8] != _PNG_MAGIC:
+                problems.append(f"NOT PNG  {rel}")
+            else:
+                ok.append(f"OK  {rel} ({size} bytes)")
+        elif "<svg" not in path.read_text(encoding="utf-8", errors="ignore"):
             problems.append(f"NOT SVG  {rel}")
         else:
             ok.append(f"OK  {rel} ({size} bytes)")

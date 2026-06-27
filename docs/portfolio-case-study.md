@@ -21,15 +21,21 @@ escalate complex cases to a human manager – while keeping conversation context
 
 ## The prototype
 
-A single FastAPI service exposing a LangGraph agent that:
+A single FastAPI service exposing a LangGraph agent whose reasoning layer is an
+**LLM planner** with **backend action validation**:
 
+- The **planner** reads the company profile, RAG knowledge, history, session
+  memory, the lead draft and ticket state, and returns one structured JSON
+  decision: intent, memory updates, extracted fields, reply strategy and a single
+  recommended action.
+- The **backend validates every action** and creates a **CRM lead** or
+  **escalation ticket** only when its deterministic rules allow — the LLM never
+  creates records on its own, and the assistant confirms an action only after the
+  backend executes it.
 - Answers **service / pricing / workflow** questions via **RAG** over a synthetic
-  knowledge base.
-- **Qualifies leads**: detects intent to work with the agency, collects missing
-  details across turns, and creates a **CRM lead**.
-- **Escalates**: routes explicit human requests, complaints, or low-confidence
-  cases to a **support ticket** for a human manager.
-- **Remembers** details within a session (name, contact, service interest).
+  knowledge base, with sources tracked in the response.
+- **Remembers** details within a session (name, company, contact, service
+  interest); the final user-facing reply is **LLM-generated**, not scripted.
 - Is reachable via REST and a **Telegram bot**.
 
 ## Why these technologies

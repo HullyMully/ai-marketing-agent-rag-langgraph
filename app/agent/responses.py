@@ -18,19 +18,14 @@ def _pick(options: list[str], index: int) -> str:
 # Social / greeting
 # --------------------------------------------------------------------------- #
 _GREETINGS = [
-    "Hi! Good to see you. I can help with marketing questions, pricing, or "
-    "starting a project whenever you're ready.",
-    "Hey again. Want to ask about services, pricing, or just start with a quick "
-    "project idea?",
-    "Hello! No rush — I'm here for marketing questions, pricing, or a project "
-    "whenever you'd like.",
+    "Hi, good to see you. We can talk casually first, and you can ask a specific question whenever it comes up.",
+    "Hey. What's on your mind right now?",
+    "Hello. We can start simple: ask a question, describe a goal, or just get oriented.",
 ]
 
 _JUST_HELLO = [
-    "Got it — just saying hello \U0001F642 No rush. When you're ready, I can help "
-    "with marketing services, pricing, or a project request.",
-    "Hello to you too \U0001F642 Whenever you feel like it, I can talk through "
-    "services, pricing, or a project idea.",
+    "Got it, just saying hello. No rush; we can keep it light.",
+    "Hello to you too. We can chat first and get practical only when you want.",
 ]
 
 
@@ -64,11 +59,10 @@ def explore(service: str, product: str, index: int) -> str:
     svc = (service or "marketing").lower()
     where = f"a {product}" if product else "your product"
     options = [
-        f"That's okay — we can just explore options for now. For {where}, what's "
-        "the main goal: more signups, more demos, lower ad costs, or better "
-        "visibility?",
-        f"No problem. We can keep it general. Tell me what you do remember — the "
-        "product type, target audience, or the goal you have in mind.",
+        f"We can slow down and orient first. For {where}, tell me the first thing "
+        "you want to understand, and I will start there.",
+        f"We can stay broad for now. For {where}, do you want orientation, ideas, "
+        "or an explanation of the next practical step?",
         f"Sure. For {where}, a sensible starting point is usually: define the "
         f"audience, test {svc}, and improve landing-page conversion. Want me to "
         "walk through that?",
@@ -102,12 +96,12 @@ def ask_company_budget(need_company: bool, need_budget: bool, index: int) -> str
     """Varied phrasing for the company/budget step so it never repeats verbatim."""
     if need_company and need_budget:
         options = [
-            "Do you want to keep this exploratory, or should I collect details "
-            "for the team — company name and a rough monthly budget?",
-            "To prepare a request, I'd need the company name and an approximate "
-            "monthly budget. Want to continue, or keep exploring?",
-            "If you'd like to start a request, could you share the company name "
-            "and a rough monthly budget? (We can skip it if you'd rather explore.)",
+            "If you want me to prepare a request, what should I call the company "
+            "and what budget range should I note?",
+            "For a follow-up request, I need the business name and an approximate "
+            "monthly spend. Do you want to share those now?",
+            "Should I keep this exploratory, or note the company and budget range "
+            "for follow-up?",
         ]
     elif need_company:
         options = [
@@ -124,7 +118,7 @@ def ask_company_budget(need_company: bool, need_budget: bool, index: int) -> str
             "unknown if you're not sure.",
             "Do you have an approximate monthly budget in mind, or should I note "
             "it as to-be-decided?",
-            "What's a rough monthly budget? No problem if it's still undecided.",
+            "What budget range should I note? It can stay undecided if you do not have one yet.",
         ]
     return _pick(options, index)
 

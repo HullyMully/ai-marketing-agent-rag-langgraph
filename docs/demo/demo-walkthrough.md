@@ -2,11 +2,14 @@
 
 🇺🇸English | [🇷🇺Русский](./demo-walkthrough.ru.md)
 
-Five end-to-end flows for the **AI Customer Assistant** (configured here with the
-fictional sample profile). Everything runs
-in offline mode (`MOCK_LLM=true`, mock embeddings), so no API keys are needed.
+End-to-end flows for the **Configurable AI Customer Assistant Platform**,
+configured here with the shipped sample profile (Acme Growth Studio). Everything
+runs in offline mode (`MOCK_LLM=true`, mock embeddings), so no API keys are
+needed. All demo data is fictional and uses `.example` domains.
 
-> Portfolio case study for a fictional agency. All demo data is fictional (`.example` domains).
+In every flow the reply comes from the same pipeline: **LLM planner → backend
+validation → final reply**. The deterministic offline engine follows the same
+rules so the walkthrough is reproducible without a model.
 
 ## Setup
 
@@ -18,116 +21,110 @@ uvicorn app.main:app --reload             # API at http://localhost:8000
 # (optional) python scripts/seed_demo_data.py
 ```
 
-Open Swagger at `http://localhost:8000/docs`, or use the `curl` calls below. Keep
-the **same `session_id`** within a scenario to exercise conversation memory.
+Open the web UI at `http://localhost:8000/demo`, Swagger at `/docs`, or use the
+`curl` calls below. Keep the **same `session_id`** within a scenario to exercise
+conversation memory.
 
 ---
 
-## Scenario 1 – Ask about services
+## Scenario 1 — Knowledge questions (RAG)
 
-**User message:** "What services do you offer?"
+**User:** "What services do you provide?" then "What pricing packages are available?"
 
-**Expected agent behavior:** classifies intent as `service_question`, retrieves
-the relevant chunks from `services.md` via RAG, and returns a grounded answer with
-`sources`. No lead or ticket is created.
+**Expected:** the planner answers from the knowledge base (RAG over `services.md`
+/ `pricing.md`); `knowledge_used` is true and `sources` lists the files. The user
+sees a natural, summarised answer — never raw chunks. No lead or ticket.
 
-**Related API / tool call:**
 ```bash
 curl -X POST localhost:8000/chat -H "Content-Type: application/json" \
-  -d '{"session_id":"s1","user_message":"What services do you offer?"}'
-# > intent: service_question · sources: ["services.md", ...]
+  -d '{"session_id":"s1","user_message":"What services do you provide?"}'
+# > knowledge_used: true · sources: ["services.md", ...]
 ```
-
-**Demo view:** `docs/screenshots/demo-chat.svg`,
-`docs/assets/rag-pipeline.svg`
 
 ---
 
-## Scenario 2 – Pricing question answered from RAG
+## Scenario 2 — Casual / meta / venting messages create nothing
 
-**User message:** "How much does a campaign cost?"
+**User (any of):** "Hello" · "SAY HELLO TO ME" · "Another one" ·
+"What do you mean?" · "EXPLAIN WHAT DO YOU MEAN" · profanity.
 
-**Expected agent behavior:** intent `pricing_question`; retrieves from `pricing.md`
-and answers with package pricing. Demonstrates that answers are **grounded in the
-knowledge base**, not invented.
+**Expected:** a natural reply every time, **no lead, no ticket, no repeated menu,
+no scripted fallback**. If the user stays confused or annoyed, qualification
+pauses instead of pushing a form.
 
-**Related API / tool call:**
+---
+
+## Scenario 3 — Confused user, memory preserved
+
+**User (same session):**
+1. "Hello I need help with marketing"
+2. "I don't know. Help me with that"
+3. "Help starting a project please"
+4. "I want paid ads for my SaaS"
+5. "I don't remember"
+6. "Oh sorry, company is FalkoTeam"
+7. "FalkoTeam, I told you"
+
+**Expected:** the assistant remembers **FalkoTeam** and the paid-ads/SaaS interest,
+updates the lead draft, does **not** restart the flow or repeat the same question,
+and does **not** create a lead (name/email/budget still missing) or a ticket.
+
+---
+
+## Scenario 4 — User becomes a lead
+
+**User (same session):**
+1. "I want to start a project"
+2. "Paid ads for my SaaS"
+3. "Company is BrightDesk, budget around $5k/month"
+4. "My name is Sam, email sam@brightdesk.example"
+
+**Expected:** no lead until the final message (required fields incomplete). After
+message 4 the backend validates and creates **exactly one** lead containing
+BrightDesk, Sam, `sam@brightdesk.example`, paid ads, SaaS and ~$5k/month. The
+assistant confirms creation only **after** the backend confirms it; repeating the
+details does not create a duplicate.
+
 ```bash
-curl -X POST localhost:8000/chat -H "Content-Type: application/json" \
-  -d '{"session_id":"s2","user_message":"How much does a campaign cost?"}'
-# > intent: pricing_question · sources: ["pricing.md", ...]
+curl localhost:8000/crm/leads   # one lead for this session
 ```
 
-**Demo view:** `docs/screenshots/demo-chat.svg`,
-`docs/assets/rag-pipeline.svg`
+**Screenshot:** `docs/screenshots/web-chat-lead-flow.png`
 
 ---
 
-## Scenario 3 – User becomes a lead
+## Scenario 5 — Human escalation
 
-**User messages (same session):**
-1. "I want to launch paid ads for my SaaS product."
-2. "Around $5k/month. My name is Sam, company is BrightDesk, email sam@brightdesk.example."
+**User:** "I need a human manager"
 
-**Expected agent behavior:** first message > intent `create_lead`, but required
-fields are missing, so the agent asks a short follow-up (`collect_missing_info`).
-Second message > the agent **remembers** the intent, extracts name + contact +
-company + service + budget, and calls the `create_lead` tool. Response includes
-`created_lead_id` and `action_taken: "created_lead"`.
+**Expected:** the backend creates a high-priority **escalation ticket** and the
+assistant confirms hand-off — only **after** the ticket is created. The right
+panel shows the real ticket; there is no fake ticket card beforehand.
 
-**Related API / tool call:** `POST /chat` (twice) > internally calls the
-`create_lead` CRM tool. Verify with:
-```bash
-curl localhost:8000/crm/leads
-```
-
-**Demo view:** `docs/screenshots/demo-chat.svg`,
-`docs/screenshots/crm-lead-created.svg`
-
----
-
-## Scenario 4 – Ask for a human > escalation
-
-**User message:** "I need a custom enterprise plan – can I speak with a manager?"
-
-**Expected agent behavior:** intent `human_escalation` (or low confidence) >
-the agent creates a high-priority **escalation ticket** via the `escalate_to_human`
-tool, sets `escalated: true`, and tells the user a manager will follow up.
-
-**Related API / tool call:** `POST /chat` > `create_ticket` / `escalate_to_human`.
-Verify with:
 ```bash
 curl localhost:8000/tickets
 ```
 
-**Demo view:** `docs/screenshots/escalation-ticket.svg`,
-`docs/assets/langgraph-flow.svg`
-
 ---
 
-## Scenario 5 – Check demo metrics
+## Scenario 6 — Metrics
 
-**Action:** after running the scenarios above, query aggregate metrics.
-
-**Expected behavior:** returns conversation count, leads, tickets, escalation rate
-and a resolved-by-AI rate computed from the SQLite data.
-
-**Related API / tool call:**
 ```bash
 curl localhost:8000/metrics/demo
 # > {"conversations":..,"leads":..,"tickets":..,"escalation_rate":..,"resolved_by_ai_rate":..}
 ```
 
-**Demo view:** `docs/screenshots/demo-metrics.svg`
+**Screenshot:** `docs/screenshots/metrics-dashboard.png`
 
 ---
 
-## Summary of what each scenario proves
+## What each scenario demonstrates
 
-| Scenario | Skill demonstrated |
-|----------|--------------------|
-| 1 | RAG retrieval + grounded answers |
-| 2 | Knowledge-base pricing answers (no hallucination) |
-| 3 | Stateful dialogue, memory, lead qualification, CRM tool call |
-| 4 | Escalation logic + human-in-the-loop ticketing |
-| 5 | Metrics / observability over stored data |
+| Scenario | Demonstrates |
+|----------|--------------|
+| 1 | RAG retrieval + grounded answers with tracked sources |
+| 2 | No lead/ticket on casual/meta/abusive input; no scripted fallback |
+| 3 | Session memory + lead draft; no repeated questions |
+| 4 | Validated, single lead creation only when all fields are present |
+| 5 | Backend-confirmed escalation (no fake ticket cards) |
+| 6 | Metrics / observability over stored data |

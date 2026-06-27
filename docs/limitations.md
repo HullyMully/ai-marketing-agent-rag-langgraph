@@ -6,15 +6,20 @@ This project is a **portfolio MVP / prototype**, intentionally scoped to be clea
 and runnable rather than production-grade. Known limitations:
 
 ## AI / RAG
-- **Mock LLM** (`MOCK_LLM=true`) is a deterministic, templated stand-in – it does
-  not reason. Use a real OpenAI-compatible model for genuine generation.
+- **Reasoning layer.** With a real OpenAI-compatible model the **LLM planner** is
+  the reasoning layer (intent, memory, field extraction, reply strategy and the
+  recommended action). With `MOCK_LLM=true` a deterministic engine reproduces the
+  same decision contract offline — a predictable stand-in for tests/CI and a safe
+  fallback, **not** a substitute for genuine LLM reasoning.
 - **Mock embeddings** are a hashing bag-of-words with stopword filtering. They are
   stable and dependency-free but **not semantically strong**. Real embeddings give
   much better retrieval.
-- **Intent classification** in demo mode is keyword/rule-based. It is predictable
-  and good for tests, but brittle on paraphrases; the LLM path is more robust.
-- **Slot extraction** (name/contact/etc.) uses simple regexes and will miss
-  unusual formats. Structured-output LLM extraction would be more reliable.
+- **Deterministic field extraction** (email/budget/etc.) backs up the planner so
+  business-critical fields stay reliable; it uses simple regexes and can miss
+  unusual formats.
+- **Action validation is deliberately deterministic** (`app/agent/validation.py`)
+  so the LLM can never create a lead or ticket on its own — a safety feature, but
+  it means the exact lead/ticket rules are code, not learned.
 
 ## Engineering
 - **No authentication / rate limiting** on the API.

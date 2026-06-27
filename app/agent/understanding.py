@@ -150,7 +150,7 @@ _PRODUCTS = {
 _NOT_NAMES = {
     "hi", "hello", "hey", "company", "budget", "the", "contact", "email", "we",
     "our", "yes", "no", "ok", "okay", "thanks", "sure", "paid", "seo", "help",
-    "sorry", "oh", "please",
+    "sorry", "oh", "please", "what", "why", "how", "when", "where", "who",
 }
 
 

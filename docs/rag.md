@@ -3,7 +3,10 @@
 🇺🇸English | [🇷🇺Русский](./rag.ru.md)
 
 The agent answers service / pricing / workflow questions from a small markdown
-knowledge base rather than from the LLM's parametric memory.
+knowledge base rather than from the LLM's parametric memory. Relevant chunks are
+retrieved and passed to the **LLM planner** as `knowledge_context`; the planner
+(or the final reply step) **summarises** them into a natural answer and records
+the source files in `sources`. Raw chunks are never dumped to the user.
 
 ## Pipeline
 

@@ -2,63 +2,76 @@
 
 English | [Русский](./langgraph-flow.ru.md)
 
-The agent is a compiled `StateGraph` (see `app/agent/graph.py`). State is a
-`TypedDict` (`app/agent/state.py`) threaded through every node.
+The agent is a compiled `StateGraph` (see `app/agent/graph.py`) with just two
+nodes: **`plan`** and **`act`**. State is a `TypedDict` (`app/agent/state.py`)
+threaded through both nodes. The reasoning lives in the **LLM planner**
+(`app/agent/planner.py`); the graph orchestrates and the backend validates.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> classify_intent
-    classify_intent --> retrieve_knowledge
-    retrieve_knowledge --> decide_action
-    decide_action --> greeting: greeting
-    decide_action --> generate_answer: service / pricing / support (RAG)
-    decide_action --> collect_missing_info: lead, missing info
-    decide_action --> call_tool: lead, info complete
-    decide_action --> memory_answer: memory_question
-    decide_action --> clarify: unknown (first time)
-    decide_action --> escalate_to_human: explicit human request, OR unknown after a clarification
-    greeting --> [*]
-    generate_answer --> [*]
-    collect_missing_info --> [*]
-    call_tool --> [*]
-    memory_answer --> [*]
-    clarify --> [*]
-    escalate_to_human --> [*]
+    [*] --> plan
+    plan --> act
+    act --> [*]
 ```
 
-## Nodes
+## Node `plan`
 
-| Node | What it does |
-|------|--------------|
-| `classify_intent` | Rule-based (mock) or LLM intent + confidence; extracts lead slots into memory |
-| `retrieve_knowledge` | For knowledge intents, fetches top-k chunks from the vector store |
-| `decide_action` | Sets the routing key based on intent and lead/clarification state |
-| `greeting` | Replies with a short, friendly onboarding message (no ticket, no lead) |
-| `generate_answer` | Builds a grounded answer from retrieved context (RAG) |
-| `collect_missing_info` | Asks one short follow-up for missing lead fields |
-| `call_tool` | Creates the CRM lead from collected slots, clears them |
-| `memory_answer` | Answers a recall question from the collected session slots |
-| `clarify` | Asks one clarifying question for an unclear message |
-| `escalate_to_human` | Creates a high-priority ticket and tells the user |
+1. Builds the planner **input** from the company profile, retrieved RAG
+   knowledge, recent conversation history, session memory, the current lead
+   draft, the ticket state and the list of available actions, plus the latest
+   user message.
+2. Calls the planner, which returns a single structured **JSON decision**
+   (intent, assistant mode, extracted fields, memory updates, missing fields,
+   one recommended action, a natural reply, knowledge-used + sources, and a
+   confidence score). The output is validated with Pydantic; invalid JSON is
+   repaired with one retry, and a still-invalid result becomes a controlled
+   internal error rather than a crash.
 
-## Supported intents
+## Node `act`
 
-`greeting`, `service_question`, `pricing_question`, `lead_qualification`,
-`create_lead`, `support_request`, `human_escalation`, `memory_question`,
-`unknown`.
+The planner only *recommends* an action — the backend decides whether it runs
+(`app/agent/validation.py`):
 
-## Decision rules
+- **`create_lead`** executes only when the lead rules pass (see below); otherwise
+  the assistant naturally asks for what's missing.
+- **`create_ticket`** executes only when escalation is justified; otherwise the
+  assistant clarifies instead.
+- **`answer_only` / `ask_clarifying_question` / `update_lead_draft` /
+  `pause_qualification` / `retrieve_knowledge`** relay the planner's reply (or, in
+  real-LLM mode, a freshly generated contextual reply).
 
-- **Greeting** → a friendly onboarding reply. No ticket, no lead.
-- **Service / pricing / support questions** → RAG answer (`generate_answer`).
-- **Interested / wants to start (lead_qualification)** → collect `name` + `contact`
-  (and ideally company, service, budget); once present, create the lead.
-- **Full lead details given (create_lead)** → `call_tool` creates the CRM lead.
-- **Recall question (memory_question)** → answer from the session's stored details.
-- **Explicit human request, anger/complaint, or custom-enterprise need
-  (human_escalation)** → create an escalation ticket.
-- **Unclear message (unknown)** → ask one clarifying question. Only if the next
-  message is *still* unclear does the agent escalate.
+Memory updates and the lead draft are applied, side effects (lead/ticket ids) are
+recorded, and the **final user-facing reply is LLM-generated** — never a scripted
+template in normal chat.
 
-Crucially, low confidence by itself never creates a ticket: greetings and generic
-"new customer" messages are treated as lead qualification, not escalation.
+## Available actions
+
+`answer_only`, `update_lead_draft`, `create_lead`, `create_ticket`,
+`ask_clarifying_question`, `pause_qualification`, `retrieve_knowledge`.
+
+## Lead-creation rules
+
+A lead is created only when **all** hold: no lead exists yet for the session; a
+name, a company, a valid email and a service interest are present; and a budget
+range is present **or** the budget is explicitly unknown and the user agreed to
+proceed without one — and the planner actually recommended `create_lead`. Until
+then the assistant keeps qualifying. Duplicate leads for the same session are
+blocked.
+
+## Ticket-escalation rules
+
+A ticket is created only when escalation is genuinely justified: an explicit
+request for a human/manager/operator/specialist/support, a real
+complaint/frustration, a custom/enterprise need, or a high-confidence planner
+escalation with a substantive reason that the backend rules agree with. A bare
+greeting, "I am a new customer", "what do you mean?", "I don't remember",
+"I told you", jokes, ordinary confusion or ordinary swearing **never** open a
+ticket.
+
+## Offline mode
+
+With `MOCK_LLM=true` a deterministic engine produces the same decision contract
+without any API call, so the whole graph runs and is testable offline. It is also
+the safe fallback if a real model call fails. The deterministic engine is an
+offline stand-in, not the product's reasoning layer — with a real model the LLM
+planner makes the decisions and writes every reply.

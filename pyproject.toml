@@ -1,7 +1,7 @@
 [project]
 name = "ai-marketing-agent-rag-langgraph"
 version = "0.1.0"
-description = "Conversational AI agent for a fictional marketing agency: LangGraph, RAG, Qdrant, FastAPI, Telegram bot and CRM actions."
+description = "Configurable AI Customer Assistant Platform: an LLM planner with backend action validation, RAG over a Qdrant vector store, FastAPI, a Telegram bot and CRM/ticket actions."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -10,6 +10,9 @@ license = { text = "MIT" }
 asyncio_mode = "auto"
 testpaths = ["tests"]
 addopts = "-q"
+markers = [
+    "integration: exercises a real OpenAI-compatible LLM; skipped unless RUN_LLM_INTEGRATION=1",
+]
 
 [tool.ruff]
 line-length = 100

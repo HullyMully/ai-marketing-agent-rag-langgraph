@@ -44,6 +44,12 @@ def _empty_draft() -> dict:
         "exploration_mode": False,     # help the user think, don't qualify
         "qualification_active": False, # the user wants to start a request
         "last_assistant_summary": "",  # short summary of our previous reply
+        # --- session memory (planner) ---
+        "last_user_intent": "",        # intent of the most recent user message
+        "last_assistant_question": "", # the last question the assistant asked
+        "conversation_summary": "",    # rolling summary for long chats
+        "known_facts": [],             # free-form facts worth remembering
+        "ticket_created": False,       # a support/escalation ticket exists
     }
 
 
@@ -165,6 +171,18 @@ class ConversationMemory:
 
     def set_flag(self, session_id: str, key: str, value) -> None:
         self._live(session_id)[key] = value
+
+    def remember_facts(self, session_id: str, facts: list[str]) -> None:
+        """Append free-form facts worth remembering (de-duplicated)."""
+        if not facts:
+            return
+        draft = self._live(session_id)
+        known = list(draft.get("known_facts", []))
+        for fact in facts:
+            fact = str(fact).strip()
+            if fact and fact not in known:
+                known.append(fact)
+        draft["known_facts"] = known[-20:]
 
     def dialogue_state(self, session_id: str) -> dict:
         """Public snapshot of the dialogue-tracking counters/flags."""
