@@ -7,7 +7,6 @@ deterministic mock planner.
 """
 import uuid
 
-import pytest
 from fastapi.testclient import TestClient
 
 from app.agent import graph as graph_mod
@@ -96,7 +95,7 @@ def test_duplicate_create_lead_recommendation_makes_one_lead(client: TestClient,
                         _canned(PlannerDecision(recommended_action="create_lead")))
 
     first = _chat(client, sid, "go ahead")
-    second = _chat(client, sid, "go ahead")
+    _chat(client, sid, "go ahead")
     assert first["lead_created"] is True
     lead_id = first["lead_id"]
     # No duplicate lead created in the CRM for this company.

@@ -1110,7 +1110,9 @@ def run_agent(
 
     # --- planner / validation transparency metadata ---
     result["planner_decision"] = (
-        decision.as_public_dict() if hasattr(decision, "as_public_dict") else {}
+        decision.as_public_dict()
+        if decision is not None and hasattr(decision, "as_public_dict")
+        else {}
     )
     result["validation"] = result.get("validation") or {
         "allowed": None, "reason": "not_applicable", "missing_fields": [],

@@ -12,6 +12,7 @@
 > [docs/company-configuration.ru.md](docs/company-configuration.ru.md).
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
+[![CI](https://github.com/HullyMully/ai-marketing-agent-rag-langgraph/actions/workflows/ci.yml/badge.svg)](https://github.com/HullyMully/ai-marketing-agent-rag-langgraph/actions/workflows/ci.yml)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688)](https://fastapi.tiangolo.com/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-stateful%20agent-orange)](https://langchain-ai.github.io/langgraph/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
@@ -194,6 +195,29 @@ uvicorn app.main:app --reload
 ```
 
 Документация: **http://localhost:8000/docs**.
+
+### Процесс разработки
+
+Локальные команды и CI используют единый интерфейс через `make`:
+
+```bash
+make setup       # создать .venv и установить runtime + dev-зависимости
+make run         # запустить FastAPI в режиме разработки
+make test        # запустить pytest
+make lint        # запустить Ruff
+make typecheck   # запустить mypy
+make docs        # проверить двуязычную документацию и демо-материалы
+make check       # выполнить полный локальный quality gate
+```
+
+Чтобы запускать лёгкие проверки перед каждым коммитом:
+
+```bash
+.venv/bin/pre-commit install
+```
+
+GitHub Actions запускает проверки качества и тесты на Python 3.10, 3.11 и 3.12
+для каждого pull request и каждого push в `main`.
 
 ### Использование реального LLM
 

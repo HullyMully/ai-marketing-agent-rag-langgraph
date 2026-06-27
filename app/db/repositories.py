@@ -6,6 +6,7 @@ talk to SQLAlchemy directly – they depend on small, testable functions.
 from __future__ import annotations
 
 import json
+from collections.abc import Sequence
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -132,7 +133,7 @@ class TicketRepository:
         self.db.refresh(note)
         return note
 
-    def notes(self, ticket_id: int, limit: int = 100) -> list[TicketNote]:
+    def notes(self, ticket_id: int, limit: int = 100) -> Sequence[TicketNote]:
         stmt = (
             select(TicketNote)
             .where(TicketNote.ticket_id == ticket_id)

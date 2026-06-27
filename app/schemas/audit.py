@@ -23,7 +23,6 @@ class AuditLogOut(BaseModel):
     created_at: datetime
 
     @computed_field
-    @property
     def metadata(self) -> dict[str, Any]:
         if not self.metadata_json:
             return {}

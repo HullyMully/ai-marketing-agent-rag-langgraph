@@ -82,12 +82,14 @@ class QdrantVectorStore:
         results = self._client.search(
             collection_name=self._collection, query_vector=vector, limit=top_k
         )
-        return [
-            SearchHit(
-                text=r.payload["text"], source=r.payload["source"], score=float(r.score)
-            )
-            for r in results
-        ]
+        hits: list[SearchHit] = []
+        for result in results:
+            payload = result.payload or {}
+            text = payload.get("text")
+            source = payload.get("source")
+            if isinstance(text, str) and isinstance(source, str):
+                hits.append(SearchHit(text=text, source=source, score=float(result.score)))
+        return hits
 
 
 def get_vector_store(embedder: EmbeddingProvider):

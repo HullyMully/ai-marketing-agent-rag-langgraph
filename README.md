@@ -12,6 +12,7 @@ behind your own API.
 > [docs/company-configuration.md](docs/company-configuration.md).
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
+[![CI](https://github.com/HullyMully/ai-marketing-agent-rag-langgraph/actions/workflows/ci.yml/badge.svg)](https://github.com/HullyMully/ai-marketing-agent-rag-langgraph/actions/workflows/ci.yml)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688)](https://fastapi.tiangolo.com/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-stateful%20agent-orange)](https://langchain-ai.github.io/langgraph/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
@@ -208,6 +209,29 @@ uvicorn app.main:app --reload
 ```
 
 Open the interactive docs at **http://localhost:8000/docs**.
+
+### Development workflow
+
+The repository exposes the local and CI workflow through `make`:
+
+```bash
+make setup       # create .venv and install runtime + development dependencies
+make run         # start the FastAPI development server
+make test        # run pytest
+make lint        # run Ruff
+make typecheck   # run mypy
+make docs        # validate bilingual docs and demo assets
+make check       # run the complete local quality gate
+```
+
+Enable the same lightweight checks before each commit:
+
+```bash
+.venv/bin/pre-commit install
+```
+
+GitHub Actions runs quality checks and the test suite on Python 3.10, 3.11 and
+3.12 for every pull request and every push to `main`.
 
 ## Configure your company
 

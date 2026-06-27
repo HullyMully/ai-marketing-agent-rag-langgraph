@@ -14,6 +14,8 @@ import math
 import re
 from typing import Protocol
 
+from pydantic.v1 import SecretStr
+
 from app.config import settings
 
 
@@ -74,7 +76,7 @@ class OpenAIEmbeddingProvider:
 
         self._client = OpenAIEmbeddings(
             model=settings.embedding_model,
-            api_key=settings.openai_api_key,
+            api_key=SecretStr(settings.openai_api_key),
             base_url=settings.openai_base_url,
         )
         # text-embedding-3-small -> 1536 dims; allow override via settings.

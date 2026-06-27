@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+from typing import TypedDict
 from urllib import request
 from urllib.error import URLError
 
@@ -15,11 +16,18 @@ from app.db.database import session_scope
 from app.db.repositories import CrmDispatchRepository, CrmIntegrationRepository
 
 
+class _CrmConfig(TypedDict):
+    provider: str
+    enabled: bool
+    webhook_url: str | None
+    api_key_env: str | None
+
+
 def dispatch_lead_to_crm(lead: dict) -> dict:
     """Dispatch one lead to the configured outbound CRM integration."""
     with session_scope() as db:
         integration = CrmIntegrationRepository(db).get()
-        config = {
+        config: _CrmConfig = {
             "provider": integration.provider or "local",
             "enabled": bool(integration.enabled),
             "webhook_url": integration.webhook_url,

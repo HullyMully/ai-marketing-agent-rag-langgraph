@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import logging
 
+from pydantic.v1 import SecretStr
+
 from app.config import settings
 
 logger = logging.getLogger("assistant.llm")
@@ -41,7 +43,7 @@ class OpenAILLM:
         )
         self._client = ChatOpenAI(
             model=settings.llm_model,
-            api_key=settings.openai_api_key,
+            api_key=SecretStr(settings.openai_api_key),
             base_url=settings.openai_base_url,
             temperature=settings.llm_temperature,
             timeout=settings.llm_timeout,

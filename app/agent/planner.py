@@ -229,6 +229,10 @@ def plan(context: dict, *, memory=None, session: str | None = None) -> PlannerDe
     crashes on bad model output.
     """
     from app.config import settings
+    from app.agent.memory import get_memory
+
+    memory = memory or get_memory()
+    session = session or "default"
 
     if settings.mock_llm:
         return _mock_plan(context, memory, session)
@@ -300,7 +304,7 @@ _REPAIR_NOTE = (
 )
 
 
-def _llm_plan(context: dict, memory, session: str | None) -> PlannerDecision:
+def _llm_plan(context: dict, memory, session: str) -> PlannerDecision:
     prompt = build_planner_prompt(context)
     llm = get_llm()
 
@@ -537,7 +541,7 @@ def _safe_float(value, default: float) -> float:
 # --------------------------------------------------------------------------- #
 # Deterministic mock backend (offline + safe fallback)
 # --------------------------------------------------------------------------- #
-def _mock_plan(context: dict, memory, session: str | None) -> PlannerDecision:
+def _mock_plan(context: dict, memory, session: str) -> PlannerDecision:
     """Deterministic planner used in MOCK_LLM mode and as the LLM fallback.
 
     It reproduces the natural-dialogue policy without any API call, updating the
@@ -1293,7 +1297,6 @@ def _orientation_reply(context, memory, session) -> str:
 
 
 def _collect_reply(context, memory, session, a: Analysis, saved: list):
-    draft = memory.get_draft(session)
     missing = memory.missing_fields(session)
     qtype = _question_type(missing)
     progressed = bool(saved)
