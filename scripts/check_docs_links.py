@@ -27,6 +27,7 @@ DOC_PAIRS: list[tuple[str, str]] = [
     ("docs/roadmap.md", "docs/roadmap.ru.md"),
     ("docs/portfolio-case-study.md", "docs/portfolio-case-study.ru.md"),
     ("docs/demo/demo-walkthrough.md", "docs/demo/demo-walkthrough.ru.md"),
+    ("docs/demo/portfolio-demo-script.md", "docs/demo/portfolio-demo-script.ru.md"),
     ("docs/screenshots/README.md", "docs/screenshots/README.ru.md"),
 ]
 

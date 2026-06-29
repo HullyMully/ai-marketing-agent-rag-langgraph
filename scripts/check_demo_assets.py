@@ -22,6 +22,8 @@ EXPECTED_ASSETS: list[str] = [
     # real product screenshots (PNG) — these are what the README displays
     "docs/screenshots/landing-page.png",
     "docs/screenshots/web-chat-lead-flow.png",
+    "docs/screenshots/admin-knowledge-base.png",
+    "docs/screenshots/admin-operations.png",
     "docs/screenshots/api-overview.png",
     "docs/screenshots/metrics-dashboard.png",
 ]

@@ -1,10 +1,10 @@
 # AI Customer Assistant
 
 A **configurable AI customer assistant** for small companies — built with
-**LangGraph**, **RAG (Qdrant)**, **FastAPI**, a **Telegram bot**, a **mock CRM**,
-support tickets and human escalation. Configure your business profile, upload your
-own knowledge base, connect an LLM provider, and run the assistant locally or
-behind your own API.
+**LangGraph**, **RAG (Qdrant)**, **FastAPI**, a **Telegram bot**, CRM integration,
+support operations and human escalation. Configure your business profile, upload
+your own knowledge base, connect an LLM provider, and run the assistant locally
+or behind your own API.
 
 > **Ships with a fictional sample configuration** (a digital marketing studio,
 > `.example` domains only) so it runs end to end out of the box. Replace the
@@ -23,22 +23,19 @@ behind your own API.
 
 ## Demo screenshots
 
+<p align="center">
+  <img src="docs/screenshots/web-chat-lead-flow.png" alt="Validated lead creation in the assistant" width="100%">
+  <br><em>Live conversation → structured planner decision → backend-validated lead creation</em>
+</p>
+
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/landing-page.png" alt="Landing page" width="100%"></td>
-    <td width="50%"><img src="docs/screenshots/web-chat-lead-flow.png" alt="Lead creation flow" width="100%"></td>
+    <td width="50%"><img src="docs/screenshots/admin-knowledge-base.png" alt="Knowledge base and CRM integration settings" width="100%"></td>
+    <td width="50%"><img src="docs/screenshots/admin-operations.png" alt="Lead table and human support inbox" width="100%"></td>
   </tr>
   <tr>
-    <td align="center"><em>Landing page</em></td>
-    <td align="center"><em>Lead creation flow</em></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src="docs/screenshots/api-overview.png" alt="API overview" width="100%"></td>
-    <td width="50%"><img src="docs/screenshots/metrics-dashboard.png" alt="Metrics dashboard" width="100%"></td>
-  </tr>
-  <tr>
-    <td align="center"><em>API overview</em></td>
-    <td align="center"><em>Metrics dashboard</em></td>
+    <td align="center"><em>Knowledge Base Admin and CRM sync</em></td>
+    <td align="center"><em>CRM leads and Human Inbox</em></td>
   </tr>
 </table>
 
@@ -56,6 +53,16 @@ The web demo's replies all come from the live agent (no scripted flows). See
 [docs/web-demo.md](docs/web-demo.md) for details, or
 [docs/demo/demo-walkthrough.md](docs/demo/demo-walkthrough.md) for the full flow.
 You can also talk to the agent through the Telegram bot.
+
+### 90-second demo path
+
+1. Open `/demo` and submit one complete project request.
+2. Show the planner recommendation, backend validation and executed action.
+3. Open `/admin` and find the lead next to the Human Inbox.
+4. Finish with the editable knowledge base and CRM integration settings.
+
+Use the concise [portfolio demo script](docs/demo/portfolio-demo-script.md) for a
+reproducible interview walkthrough.
 
 ## What it does
 

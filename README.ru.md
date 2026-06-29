@@ -1,13 +1,13 @@
 # AI Customer Assistant
 
 **Настраиваемый ИИ-ассистент для клиентов** для небольших компаний – на
-**LangGraph**, **RAG (Qdrant)**, **FastAPI**, с **Telegram-ботом**, **мок-CRM**,
-тикетами поддержки и эскалацией на человека. Настройте профиль бизнеса, загрузите
-свою базу знаний, подключите LLM-провайдера и запускайте ассистента локально или
-за собственным API.
+**LangGraph**, **RAG (Qdrant)**, **FastAPI**, с **Telegram-ботом**, CRM-интеграцией,
+операционной поддержкой и эскалацией на человека. Настройте профиль бизнеса,
+загрузите свою базу знаний, подключите LLM-провайдера и запускайте ассистента
+локально или за собственным API.
 
-> **В комплекте идёт вымышленная демонстрационная конфигурация** (digital-студия,
-> только домены `.example`), поэтому проект работает «из коробки». Замените образцовый
+> **В комплекте идёт демонстрационная конфигурация** (digital-студия,
+> только домены `.example`), поэтому проект работает из коробки. Замените образцовый
 > профиль компании и базу знаний на свои — см.
 > [docs/company-configuration.ru.md](docs/company-configuration.ru.md).
 
@@ -23,22 +23,19 @@
 
 ## Скриншоты демо
 
+<p align="center">
+  <img src="docs/screenshots/web-chat-lead-flow.png" alt="Проверенное создание лида в ассистенте" width="100%">
+  <br><em>Живой диалог → структурированное решение → проверенное бэкендом создание лида</em>
+</p>
+
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/landing-page.png" alt="Лендинг" width="100%"></td>
-    <td width="50%"><img src="docs/screenshots/web-chat-lead-flow.png" alt="Создание лида" width="100%"></td>
+    <td width="50%"><img src="docs/screenshots/admin-knowledge-base.png" alt="База знаний и настройки CRM" width="100%"></td>
+    <td width="50%"><img src="docs/screenshots/admin-operations.png" alt="Таблица лидов и Human Inbox" width="100%"></td>
   </tr>
   <tr>
-    <td align="center"><em>Лендинг</em></td>
-    <td align="center"><em>Создание лида</em></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src="docs/screenshots/api-overview.png" alt="Обзор API" width="100%"></td>
-    <td width="50%"><img src="docs/screenshots/metrics-dashboard.png" alt="Дашборд метрик" width="100%"></td>
-  </tr>
-  <tr>
-    <td align="center"><em>Обзор API</em></td>
-    <td align="center"><em>Дашборд метрик</em></td>
+    <td align="center"><em>Knowledge Base Admin и CRM sync</em></td>
+    <td align="center"><em>CRM-лиды и Human Inbox</em></td>
   </tr>
 </table>
 
@@ -47,6 +44,7 @@
 
 - Лендинг: <http://localhost:8000/>
 - Веб-демо: <http://localhost:8000/demo>
+- Админ-панель: <http://localhost:8000/admin>
 - Обзор API: <http://localhost:8000/api-overview>
 - Дашборд метрик: <http://localhost:8000/metrics>
 - Swagger-документация: <http://localhost:8000/docs>
@@ -55,6 +53,16 @@
 Подробнее – в [docs/web-demo.md](docs/web-demo.md), полный сценарий –
 в [docs/demo/demo-walkthrough.md](docs/demo/demo-walkthrough.md). С агентом также
 можно общаться через Telegram-бот.
+
+### 90-секундный сценарий показа
+
+1. Откройте `/demo` и отправьте один полный запрос на проект.
+2. Покажите рекомендацию планировщика, валидацию бэкенда и выполненное действие.
+3. Откройте `/admin` и найдите лид рядом с Human Inbox.
+4. Завершите показ редактируемой базой знаний и настройками CRM-интеграции.
+
+Для собеседования используйте короткий
+[сценарий портфельного демо](docs/demo/portfolio-demo-script.ru.md).
 
 ## Что показывает проект
 
@@ -112,8 +120,10 @@ OpenAI-совместимым эндпоинтом при настройке.
   конвейере **LangGraph** `plan → act`.
 - **LangChain** для шаблонов промптов, абстракции LLM и retriever-цепочки.
 - Поддержка **OpenAI-совместимых / DeepSeek** моделей и детерминированный режим `MOCK_LLM`.
-- **RAG** по markdown-документамcle: чанкинг + эмбеддинги + векторный поиск в **Qdrant**.
+- **RAG** по markdown-документам: чанкинг + эмбеддинги + векторный поиск в **Qdrant**.
 - **Мок-CRM** + **тикеты**, сохраняемые в SQLite через чистый слой репозиториев.
+- **Админ-панель** для профиля компании, базы знаний, лидов, Human Inbox,
+  CRM-интеграций и audit log.
 - **Память сессии** – агент помнит данные (имя, контакт, услугу) в рамках сессии.
 - **Telegram-бот** (aiogram), работающий через API.
 - Эндпоинт **демо-метрик** (разговоры, лиды, тикеты, доли эскалации / решённых ИИ).

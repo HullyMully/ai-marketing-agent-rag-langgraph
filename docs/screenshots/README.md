@@ -17,7 +17,9 @@ Diagrams (`docs/assets/`):
 Demo screenshots (`docs/screenshots/`):
 
 - `landing-page.png` – landing page
-- `web-chat-lead-flow.png` – lead creation flow in the chat demo
+- `web-chat-lead-flow.png` – backend-validated lead creation in the chat demo
+- `admin-knowledge-base.png` – knowledge-base editor and CRM integration settings
+- `admin-operations.png` – CRM leads and the human support inbox
 - `api-overview.png` – API overview page
 - `metrics-dashboard.png` – metrics dashboard
 
@@ -32,5 +34,5 @@ Demo screenshots (`docs/screenshots/`):
 To use captures from a running instance, start the app (`uvicorn app.main:app
 --reload`), run the flows in [../demo/demo-walkthrough.md](../demo/demo-walkthrough.md),
 and save PNGs into this folder. Then point the image paths in `README.md` and
-`README.ru.md` at the new files. Capture at 1440×900 and keep tokens and personal
-data out of frame.
+`README.ru.md` at the new files. Capture at 1440×900, use only synthetic `.example`
+contacts, and keep tokens and personal data out of frame.

@@ -17,7 +17,9 @@
 Скриншоты демо (`docs/screenshots/`):
 
 - `landing-page.png` — лендинг
-- `web-chat-lead-flow.png` — создание лида в чат-демо
+- `web-chat-lead-flow.png` — создание лида после валидации бэкендом
+- `admin-knowledge-base.png` — редактор базы знаний и настройки CRM
+- `admin-operations.png` — CRM-лиды и Human Inbox
 - `api-overview.png` — страница обзора API
 - `metrics-dashboard.png` — дашборд метрик
 
@@ -33,4 +35,5 @@
 (`uvicorn app.main:app --reload`), прогоните сценарии из
 [../demo/demo-walkthrough.ru.md](../demo/demo-walkthrough.ru.md) и сохраните PNG в
 эту папку. Затем укажите новые пути к изображениям в `README.md` и `README.ru.md`.
-Снимайте в 1440×900 и не оставляйте в кадре токены и личные данные.
+Снимайте в 1440×900, используйте только синтетические контакты `.example` и не
+оставляйте в кадре токены или личные данные.

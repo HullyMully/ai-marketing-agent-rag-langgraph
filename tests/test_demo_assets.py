@@ -1,4 +1,4 @@
-"""Smoke test: all demo visual assets exist and are valid SVG."""
+"""Smoke test: all demo diagrams and screenshots exist and are valid."""
 from scripts.check_demo_assets import EXPECTED_ASSETS, check_assets
 
 
